@@ -116,6 +116,16 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+@theme inline {
+  --color-snippet: #3b82f6;
+  --color-prompt: #8b5cf6;
+  --color-command: #f97316;
+  --color-note: #fde047;
+  --color-file: #6b7280;
+  --color-image: #ec4899;
+  --color-link: #10b981;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
