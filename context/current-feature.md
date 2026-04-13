@@ -1,5 +1,5 @@
 # Current Feature
-Dashboard UI Phase 2
+Dashboard UI Phase 3
 
 ## Status
 Completed
@@ -7,6 +7,15 @@ Completed
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+### 2026-04-13 — Dashboard UI Phase 3
+- Built dashboard main page (`/dashboard`) with four sections
+- Stats cards: total items, collections, favorite items, favorite collections
+- Collections grid: sorted by most recently updated, colored left accent border per default type, favorite star
+- Pinned items section: conditionally rendered, item rows with type icon, title, tags, and date
+- Recent items section: 10 most recent items sorted by `createdAt` descending, same row layout
+- All data sourced from `src/lib/mock-data.ts`
+- Build passes with no errors
 
 ### 2026-04-13 — Dashboard UI Phase 2
 - Installed ShadCN `Sheet` and `Avatar` components
