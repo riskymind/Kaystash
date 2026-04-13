@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KayStash
+
+A developer knowledge hub for snippets, commands, prompts, notes, files, images, links, and custom types.
+
+## Tech Stack
+
+- **Framework** — Next.js 16 / React 19
+- **Language** — TypeScript
+- **Database** — Neon (PostgreSQL) via Prisma 7
+- **Auth** — NextAuth v5 (Email/password + GitHub OAuth)
+- **File Storage** — Cloudflare R2
+- **AI** — OpenAI `gpt-4o-mini`
+- **Styling** — Tailwind CSS v4 + shadcn/ui
+- **Payments** — Stripe
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev        # Start dev server
+npm run build      # Production build
+npm run start      # Start production server
+npm run lint       # Lint
+npm run test       # Run tests (single run)
+npm run test:watch # Run tests in watch mode
+```
 
-## Learn More
+## Database
 
-To learn more about Next.js, take a look at the following resources:
+This project uses Prisma with Neon PostgreSQL.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> **Never use `prisma db push`.** Always generate and run migrations explicitly.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx prisma migrate dev    # Create and apply a new migration
+npx prisma migrate status # Check migration status
+npx prisma db seed        # Seed system item types
+```
