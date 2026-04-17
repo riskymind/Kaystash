@@ -1,22 +1,25 @@
 # Current Feature
-Prisma + Neon PostgreSQL Setup
+Seed Data
 
 ## Status
 In Progress
 
 ## Goals
-- Install and configure Prisma 7 ORM
-- Set up Neon PostgreSQL (serverless) as the database provider
-- Create initial schema based on data models in project-overview.md (User, Item, ItemType, Collection, ItemCollection, Tag, plus NextAuth models)
-- Include appropriate indexes and cascade deletes
-- Create initial migration (never `db push`)
-- Use a dev branch for `DATABASE_URL` and keep production separate
+- Overwrite `prisma/seed.ts` with full seed script
+- Create demo user (kele@kaystash.io, hashed password via bcryptjs 12 rounds)
+- Seed 7 system item types
+- Seed 5 collections with items linked via ItemCollection:
+  - React Patterns — 3 snippets
+  - AI Workflows — 3 prompts
+  - DevOps — 1 snippet, 1 command, 2 links
+  - Terminal Commands — 4 commands
+  - Design Resources — 4 links
 
 ## Notes
-- See spec: @context/features/database-spec.md
-- Data models reference: @context/project-overview.md
-- Prisma 7 has breaking changes — read upgrade guide before implementing
-- Always use `prisma migrate dev` for schema changes, never `prisma db push`
+- See spec: @context/features/seed-spec.md
+- Overwrite existing prisma/seed.ts (currently only seeds system types)
+- Use bcryptjs (check if installed, install if not)
+- Links must use real URLs
 
 ## History
 
