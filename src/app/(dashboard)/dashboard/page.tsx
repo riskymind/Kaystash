@@ -13,8 +13,8 @@ import {
   Heart,
   Bookmark,
 } from 'lucide-react';
-import { mockItems, mockItemTypes } from '@/lib/mock-data';
 import { getDashboardCollections, getDashboardStats, CollectionForDashboard } from '@/lib/db/collections';
+import { getPinnedItems, getRecentItems, ItemForDashboard } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
 
 // ─── Icon / color map ────────────────────────────────────────────────────────
@@ -30,10 +30,6 @@ const ICON_MAP = {
 } as const;
 
 type IconName = keyof typeof ICON_MAP;
-
-function getType(typeId: string) {
-  return mockItemTypes.find((t) => t.id === typeId);
-}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -110,10 +106,9 @@ function CollectionCard({ col }: { col: CollectionForDashboard }) {
   );
 }
 
-function ItemRow({ item }: { item: (typeof mockItems)[number] }) {
-  const type = getType(item.itemTypeId);
-  const Icon = type ? ICON_MAP[type.icon as IconName] : Box;
-  const color = type?.color ?? '#6b7280';
+function ItemRow({ item }: { item: ItemForDashboard }) {
+  const Icon = ICON_MAP[item.itemType.icon as IconName] ?? Box;
+  const color = item.itemType.color;
 
   return (
     <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
@@ -169,18 +164,19 @@ export default async function DashboardPage() {
   // TODO: replace with session user once auth is wired up
   const demoUser = await prisma.user.findUnique({ where: { email: 'kele@kaystash.io' } });
 
-  const [collections, stats] = demoUser
+  const [collections, stats, pinnedItems, recentItems] = demoUser
     ? await Promise.all([
         getDashboardCollections(demoUser.id),
         getDashboardStats(demoUser.id),
+        getPinnedItems(demoUser.id),
+        getRecentItems(demoUser.id),
       ])
-    : [[], { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 }];
-
-  // Items still from mock data — will be replaced in a future feature
-  const pinnedItems = mockItems.filter((i) => i.isPinned);
-  const recentItems = [...mockItems]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+    : [
+        [],
+        { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 },
+        [],
+        [],
+      ];
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
