@@ -1,26 +1,34 @@
 # Current Feature
-Dashboard Collections — Real Data
+Dashboard Items — Real Data
 
 ## Status
 Completed
 
 ## Goals
-- Replace dummy collection data in the dashboard main area with real data from the Neon database via Prisma
-- Create `src/lib/db/collections.ts` with data fetching functions
-- Fetch collections directly in server component (no client-side fetching)
-- Collection card border color derived from most-used content type in that collection
-- Show small icons of all types present in each collection
-- Keep the current design (reference: @context/screenshots/dashboard-ui-main.png)
-- Update collection stats display
+- Replace dummy item data in the dashboard main area with real data from the Neon database via Prisma
+- Create `src/lib/db/items.ts` with data fetching functions
+- Fetch items directly in server component (no client-side fetching)
+- Item card icon/border derived from the item type
+- Display item type tags and anything else currently shown
+- If there are no pinned items, nothing should display in that section
 
 ## Notes
-- See spec: @context/features/dashboard-collections-spec.md
-- Do NOT add items underneath collections yet — that comes later
+- See spec: @context/features/dashboard-items-spec.md
+- Layout and design is already in place — do not change it
 - Data comes from the seeded Neon database (demo user: kele@kaystash.io)
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+### 2026-04-18 — Dashboard Items — Real Data
+- Created `src/lib/db/items.ts` with `getPinnedItems` and `getRecentItems` server-side functions
+- Items fetched directly in server component alongside collections in a single `Promise.all`
+- Item row icon and border color derived from `item.itemType` (name, icon, color)
+- Tags displayed from real DB tag relations
+- Pinned section conditionally renders — hidden when no pinned items exist
+- Removed all mock data usage from dashboard page (`mockItems`, `mockItemTypes`)
+- Build passes with no errors
 
 ### 2026-04-18 — Dashboard Collections — Real Data
 - Created `src/lib/db/collections.ts` with `getDashboardCollections` and `getDashboardStats` server-side functions
