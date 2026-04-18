@@ -13,7 +13,9 @@ import {
   Heart,
   Bookmark,
 } from 'lucide-react';
-import { mockCollections, mockItems, mockItemTypes } from '@/lib/mock-data';
+import { mockItems, mockItemTypes } from '@/lib/mock-data';
+import { getDashboardCollections, getDashboardStats, CollectionForDashboard } from '@/lib/db/collections';
+import { prisma } from '@/lib/prisma';
 
 // ─── Icon / color map ────────────────────────────────────────────────────────
 
@@ -35,26 +37,9 @@ function getType(typeId: string) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string) {
+function formatDate(iso: string | Date) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
-
-// ─── Derived data ─────────────────────────────────────────────────────────────
-
-const totalItems = mockItems.length;
-const totalCollections = mockCollections.length;
-const favoriteItems = mockItems.filter((i) => i.isFavorite).length;
-const favoriteCollections = mockCollections.filter((c) => c.isFavorite).length;
-
-const recentCollections = [...mockCollections].sort(
-  (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-);
-
-const pinnedItems = mockItems.filter((i) => i.isPinned);
-
-const recentItems = [...mockItems]
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  .slice(0, 10);
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -78,14 +63,11 @@ function StatCard({
   );
 }
 
-function CollectionCard({ col }: { col: (typeof mockCollections)[number] }) {
-  const defaultType = col.defaultTypeId ? getType(col.defaultTypeId) : null;
-  const accentColor = defaultType?.color ?? '#6b7280';
-
+function CollectionCard({ col }: { col: CollectionForDashboard }) {
   return (
     <div
       className="rounded-lg border border-border bg-card p-4 hover:bg-muted/20 transition-colors relative overflow-hidden"
-      style={{ borderLeftColor: accentColor, borderLeftWidth: '3px' }}
+      style={{ borderLeftColor: col.dominantColor, borderLeftWidth: '3px' }}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-1">
@@ -102,7 +84,27 @@ function CollectionCard({ col }: { col: (typeof mockCollections)[number] }) {
 
       {/* Description */}
       {col.description && (
-        <p className="text-xs text-muted-foreground line-clamp-2">{col.description}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{col.description}</p>
+      )}
+
+      {/* Type icons */}
+      {col.typeIcons.length > 0 && (
+        <div className="flex items-center gap-1 mt-2">
+          {col.typeIcons.map((t) => {
+            const Icon = ICON_MAP[t.icon as IconName];
+            if (!Icon) return null;
+            return (
+              <div
+                key={t.name}
+                className="size-5 rounded flex items-center justify-center"
+                style={{ backgroundColor: `${t.color}20`, color: t.color }}
+                title={t.name}
+              >
+                <Icon className="size-3" />
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -163,7 +165,23 @@ function ItemRow({ item }: { item: (typeof mockItems)[number] }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // TODO: replace with session user once auth is wired up
+  const demoUser = await prisma.user.findUnique({ where: { email: 'kele@kaystash.io' } });
+
+  const [collections, stats] = demoUser
+    ? await Promise.all([
+        getDashboardCollections(demoUser.id),
+        getDashboardStats(demoUser.id),
+      ])
+    : [[], { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 }];
+
+  // Items still from mock data — will be replaced in a future feature
+  const pinnedItems = mockItems.filter((i) => i.isPinned);
+  const recentItems = [...mockItems]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       {/* Page heading */}
@@ -176,10 +194,10 @@ export default function DashboardPage() {
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Items" value={totalItems} icon={Box} />
-        <StatCard label="Collections" value={totalCollections} icon={FolderOpen} />
-        <StatCard label="Favorite Items" value={favoriteItems} icon={Heart} />
-        <StatCard label="Favorite Collections" value={favoriteCollections} icon={Bookmark} />
+        <StatCard label="Total Items" value={stats.totalItems} icon={Box} />
+        <StatCard label="Collections" value={stats.totalCollections} icon={FolderOpen} />
+        <StatCard label="Favorite Items" value={stats.favoriteItems} icon={Heart} />
+        <StatCard label="Favorite Collections" value={stats.favoriteCollections} icon={Bookmark} />
       </div>
 
       {/* Recent collections */}
@@ -191,7 +209,7 @@ export default function DashboardPage() {
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {recentCollections.map((col) => (
+          {collections.map((col) => (
             <CollectionCard key={col.id} col={col} />
           ))}
         </div>

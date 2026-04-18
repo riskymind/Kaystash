@@ -1,29 +1,46 @@
 # Current Feature
-Seed Data
+Dashboard Collections — Real Data
 
 ## Status
-In Progress
+Completed
 
 ## Goals
-- Overwrite `prisma/seed.ts` with full seed script
-- Create demo user (kele@kaystash.io, hashed password via bcryptjs 12 rounds)
-- Seed 7 system item types
-- Seed 5 collections with items linked via ItemCollection:
+- Replace dummy collection data in the dashboard main area with real data from the Neon database via Prisma
+- Create `src/lib/db/collections.ts` with data fetching functions
+- Fetch collections directly in server component (no client-side fetching)
+- Collection card border color derived from most-used content type in that collection
+- Show small icons of all types present in each collection
+- Keep the current design (reference: @context/screenshots/dashboard-ui-main.png)
+- Update collection stats display
+
+## Notes
+- See spec: @context/features/dashboard-collections-spec.md
+- Do NOT add items underneath collections yet — that comes later
+- Data comes from the seeded Neon database (demo user: kele@kaystash.io)
+
+## History
+
+<!-- Keep this updated. Earliest to latest -->
+
+### 2026-04-18 — Dashboard Collections — Real Data
+- Created `src/lib/db/collections.ts` with `getDashboardCollections` and `getDashboardStats` server-side functions
+- Collections fetched directly in server component (async page)
+- Border color derived from most-used item type in each collection
+- Small type icon chips shown for all unique types in each collection
+- Stats cards (total items, collections, favorites) now pull from real DB counts
+- Demo user looked up by email (`kele@kaystash.io`) — placeholder until auth session is wired up
+- Build passes with no errors
+
+### 2026-04-18 — Seed Data
+- Overwrote `prisma/seed.ts` with full seed script
+- Created demo user (kele@kaystash.io, bcryptjs 12 rounds)
+- Seeded 7 system item types
+- Seeded 5 collections with items linked via ItemCollection:
   - React Patterns — 3 snippets
   - AI Workflows — 3 prompts
   - DevOps — 1 snippet, 1 command, 2 links
   - Terminal Commands — 4 commands
   - Design Resources — 4 links
-
-## Notes
-- See spec: @context/features/seed-spec.md
-- Overwrite existing prisma/seed.ts (currently only seeds system types)
-- Use bcryptjs (check if installed, install if not)
-- Links must use real URLs
-
-## History
-
-<!-- Keep this updated. Earliest to latest -->
 
 ### 2026-04-13 — Dashboard UI Phase 3
 - Built dashboard main page (`/dashboard`) with four sections
