@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { mockUser, mockItemTypes, mockCollections, mockItems } from '@/lib/mock-data';
+import { SidebarItemType } from '@/lib/db/items';
+import { SidebarCollection } from '@/lib/db/collections';
 
 const ICON_MAP = {
   Code,
@@ -29,21 +30,18 @@ const ICON_MAP = {
 interface SidebarContentProps {
   collapsed?: boolean;
   onNavigate?: () => void;
+  itemTypes: SidebarItemType[];
+  sidebarCollections: SidebarCollection[];
 }
 
-export function SidebarContent({ collapsed = false, onNavigate }: SidebarContentProps) {
-  const itemCountByType = mockItemTypes.reduce<Record<string, number>>((acc, type) => {
-    acc[type.id] = mockItems.filter((item) => item.itemTypeId === type.id).length;
-    return acc;
-  }, {});
-
-  const favoriteCollections = mockCollections.filter((c) => c.isFavorite);
-  const otherCollections = mockCollections.filter((c) => !c.isFavorite);
-
-  const userInitials = mockUser.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('');
+export function SidebarContent({
+  collapsed = false,
+  onNavigate,
+  itemTypes,
+  sidebarCollections,
+}: SidebarContentProps) {
+  const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite);
+  const otherCollections = sidebarCollections.filter((c) => !c.isFavorite);
 
   return (
     <div className="flex flex-col h-full">
@@ -57,9 +55,8 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
         )}
 
         <nav className="space-y-0.5">
-          {mockItemTypes.map((type) => {
+          {itemTypes.map((type) => {
             const Icon = ICON_MAP[type.icon as keyof typeof ICON_MAP];
-            const count = itemCountByType[type.id] ?? 0;
 
             return (
               <Link
@@ -78,8 +75,8 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
                 {!collapsed && (
                   <>
                     <span className="flex-1 capitalize">{type.name}s</span>
-                    {count > 0 && (
-                      <span className="text-xs text-muted-foreground/60">{count}</span>
+                    {type.count > 0 && (
+                      <span className="text-xs text-muted-foreground/60">{type.count}</span>
                     )}
                   </>
                 )}
@@ -119,11 +116,11 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
               </>
             )}
 
-            {/* All collections */}
+            {/* Recent collections */}
             {otherCollections.length > 0 && (
               <>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 mb-1 px-2">
-                  All Collections
+                  Recent
                 </p>
                 <nav className="space-y-0.5">
                   {otherCollections.map((col) => (
@@ -133,15 +130,26 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
                       onClick={onNavigate}
                       className="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                     >
+                      {/* Colored circle for dominant item type */}
+                      <span
+                        className="size-2 rounded-full shrink-0"
+                        style={{ backgroundColor: col.dominantColor }}
+                      />
                       <span className="flex-1 truncate">{col.name}</span>
-                      <span className="text-xs text-muted-foreground/60">
-                        {col.itemCount}
-                      </span>
                     </Link>
                   ))}
                 </nav>
               </>
             )}
+
+            {/* View all collections link */}
+            <Link
+              href="/collections"
+              onClick={onNavigate}
+              className="flex items-center px-2 py-1.5 mt-2 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+            >
+              View all collections
+            </Link>
           </>
         )}
       </div>
@@ -154,14 +162,14 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
         )}
       >
         <Avatar className="size-7 shrink-0">
-          <AvatarImage src={mockUser.image ?? undefined} />
-          <AvatarFallback className="text-[10px] bg-muted">{userInitials}</AvatarFallback>
+          <AvatarImage src={undefined} />
+          <AvatarFallback className="text-[10px] bg-muted">KS</AvatarFallback>
         </Avatar>
         {!collapsed && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{mockUser.name}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{mockUser.email}</p>
+              <p className="text-xs font-medium truncate">Kele</p>
+              <p className="text-[10px] text-muted-foreground truncate">kele@kaystash.io</p>
             </div>
             <Settings className="size-3.5 text-muted-foreground shrink-0 cursor-pointer hover:text-foreground transition-colors" />
           </>

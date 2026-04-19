@@ -1,23 +1,33 @@
 # Current Feature
-Dashboard Items — Real Data
+Stats & Sidebar — Real Data
 
 ## Status
 Completed
 
 ## Goals
-- Replace dummy item data in the dashboard main area with real data from the Neon database via Prisma
-- Create `src/lib/db/items.ts` with data fetching functions
-- Fetch items directly in server component (no client-side fetching)
-- Item card icon/border derived from the item type
-- Display item type tags and anything else currently shown
-- If there are no pinned items, nothing should display in that section
+- Display stats in the main area from real database data (not mock data)
+- Display system item types in the sidebar with their icons, linking to `/items/[typename]`
+- Add "View all collections" link under the collections list that goes to `/collections`
+- Keep star icons for favorite collections in the sidebar; for recents, show a colored circle based on the most-used item type in that collection
+- Create `src/lib/db/items.ts` with database functions (use `src/lib/db/collections.ts` as reference)
 
 ## Notes
-- See spec: @context/features/dashboard-items-spec.md
-- Layout and design is already in place — do not change it
+- See spec: @context/features/stats-sidebar-spec.md
+- Keep the current design/layout — do not change it
 - Data comes from the seeded Neon database (demo user: kele@kaystash.io)
 
 ## History
+
+### 2026-04-19 — Stats & Sidebar — Real Data
+- Added `SidebarItemType` type and `getItemTypesWithCounts` function to `src/lib/db/items.ts` — queries system item types with per-user item counts
+- Added `SidebarCollection` type and `getSidebarCollections` function to `src/lib/db/collections.ts` — computes dominant color per collection from most-used item type
+- Updated `(dashboard)/layout.tsx` to be async; fetches sidebar data and passes it as props to `DashboardShell`
+- Updated `DashboardShell` to accept and forward `itemTypes` and `sidebarCollections` props to `SidebarContent`
+- Rewrote `SidebarContent` to use real DB data; removed all `mock-data` imports
+- Non-favorite (Recent) collections now show a small colored circle based on their dominant item type color
+- Favorite collections retain the star icon
+- Added "View all collections" link below the collections list linking to `/collections`
+- Build passes with no errors
 
 <!-- Keep this updated. Earliest to latest -->
 

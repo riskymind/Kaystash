@@ -1,5 +1,12 @@
 import { prisma } from '@/lib/prisma';
 
+export type SidebarCollection = {
+  id: string;
+  name: string;
+  isFavorite: boolean;
+  dominantColor: string;
+};
+
 export type CollectionForDashboard = {
   id: string;
   name: string;
@@ -69,6 +76,51 @@ export async function getDashboardCollections(userId: string): Promise<Collectio
       itemCount,
       dominantColor,
       typeIcons,
+    };
+  });
+}
+
+export async function getSidebarCollections(userId: string): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  });
+
+  return collections.map((col) => {
+    const typeCounts = new Map<string, { count: number; color: string }>();
+    for (const ic of col.items) {
+      const t = ic.item.itemType;
+      const existing = typeCounts.get(t.id);
+      if (existing) {
+        existing.count++;
+      } else {
+        typeCounts.set(t.id, { count: 1, color: t.color });
+      }
+    }
+
+    let dominantColor = '#6b7280';
+    let maxCount = 0;
+    for (const { count, color } of typeCounts.values()) {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantColor = color;
+      }
+    }
+
+    return {
+      id: col.id,
+      name: col.name,
+      isFavorite: col.isFavorite,
+      dominantColor,
     };
   });
 }
