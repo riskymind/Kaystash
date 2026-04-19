@@ -59,7 +59,7 @@ async function main() {
   // ── 3. Collections & items ────────────────────────────────────────────────
   console.log("Seeding collections and items...");
 
-  // Helper: create a collection + its items in one go
+  // Helper: create a collection + its items in one go (skips if already exists)
   async function seedCollection(params: {
     name: string;
     description: string;
@@ -75,6 +75,14 @@ async function main() {
       tags?: string[];
     }[];
   }) {
+    const existing = await prisma.collection.findFirst({
+      where: { name: params.name, userId: user.id },
+    });
+    if (existing) {
+      console.log(`  ↩ Skipping "${params.name}" (already exists)`);
+      return existing;
+    }
+
     const collection = await prisma.collection.create({
       data: {
         name: params.name,

@@ -5,12 +5,16 @@ import { Search, Plus, PanelLeft, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarContent } from './SidebarContent';
+import { SidebarItemType } from '@/lib/db/items';
+import { SidebarCollection } from '@/lib/db/collections';
 
 interface DashboardShellProps {
   children: React.ReactNode;
+  itemTypes: SidebarItemType[];
+  sidebarCollections: SidebarCollection[];
 }
 
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -70,7 +74,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
             transition: 'width 200ms ease-in-out',
           }}
         >
-          <SidebarContent collapsed={sidebarCollapsed} />
+          <SidebarContent
+            collapsed={sidebarCollapsed}
+            itemTypes={itemTypes}
+            sidebarCollections={sidebarCollections}
+          />
         </aside>
 
         {/* Mobile drawer — overlay + slide-in panel */}
@@ -96,7 +104,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 </Button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <SidebarContent onNavigate={() => setMobileOpen(false)} />
+                <SidebarContent
+                  onNavigate={() => setMobileOpen(false)}
+                  itemTypes={itemTypes}
+                  sidebarCollections={sidebarCollections}
+                />
               </div>
             </div>
           </div>
