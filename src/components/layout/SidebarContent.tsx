@@ -13,6 +13,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { SidebarItemType } from '@/lib/db/items';
 import { SidebarCollection } from '@/lib/db/collections';
@@ -75,8 +76,17 @@ export function SidebarContent({
                 {!collapsed && (
                   <>
                     <span className="flex-1 capitalize">{type.name}s</span>
-                    {type.count > 0 && (
-                      <span className="text-xs text-muted-foreground/60">{type.count}</span>
+                    {(type.name === 'file' || type.name === 'image') ? (
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1 py-0 h-4 leading-none text-muted-foreground/60 border-muted-foreground/30"
+                      >
+                        PRO
+                      </Badge>
+                    ) : (
+                      type.count > 0 && (
+                        <span className="text-xs text-muted-foreground/60">{type.count}</span>
+                      )
                     )}
                   </>
                 )}
