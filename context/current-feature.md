@@ -1,33 +1,11 @@
-# Current Feature: Auth Setup - NextAuth + GitHub Provider
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Install NextAuth v5 (`next-auth@beta`) and `@auth/prisma-adapter`
-- Set up split auth config pattern for edge compatibility
-- Add GitHub OAuth provider
-- Protect `/dashboard/*` routes using Next.js 16 proxy
-- Redirect unauthenticated users to sign-in
-
 ## Notes
-
-- Use `next-auth@beta` (not `@latest` which installs v4)
-- Proxy file must be at `src/proxy.ts` (same level as `app/`)
-- Use named export: `export const proxy = auth(...)` not default export
-- Use `session: { strategy: 'jwt' }` with split config pattern
-- Don't set custom `pages.signIn` — use NextAuth's default page
-- Use Context7 to verify newest config and conventions
-
-Files to create:
-1. `src/auth.config.ts` — Edge-compatible config (providers only, no adapter)
-2. `src/auth.ts` — Full config with Prisma adapter and JWT strategy
-3. `src/app/api/auth/[...nextauth]/route.ts` — Export handlers from auth.ts
-4. `src/proxy.ts` — Route protection with redirect logic
-5. `src/types/next-auth.d.ts` — Extend Session type with user.id
-
-Required env vars: `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`
 
 ## History
 
@@ -115,4 +93,13 @@ Required env vars: `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`
 - Added `PRO` badge next to the **file** and **image** item types in `SidebarContent`
 - Badge uses `outline` variant with muted styling — clean and subtle
 - Badge is hidden when sidebar is collapsed (consistent with existing behavior)
+- Build passes with no errors
+
+### 2026-04-21 — Auth Setup — NextAuth v5 + GitHub OAuth
+- Installed `next-auth@beta` (v5.0.0-beta.31) and `@auth/prisma-adapter`
+- Created `src/auth.config.ts` — edge-compatible config with GitHub provider only (no adapter)
+- Created `src/auth.ts` — full config with Prisma adapter, JWT session strategy, and session callback to expose `user.id`
+- Created `src/app/api/auth/[...nextauth]/route.ts` — exports GET/POST handlers
+- Created `src/proxy.ts` — Next.js 16 proxy protecting `/dashboard/*`; redirects unauthenticated users to `/api/auth/signin`
+- Created `src/types/next-auth.d.ts` — extends `Session` type with `user.id`
 - Build passes with no errors
