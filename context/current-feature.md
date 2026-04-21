@@ -103,3 +103,10 @@ Completed
 - Created `src/proxy.ts` — Next.js 16 proxy protecting `/dashboard/*`; redirects unauthenticated users to `/api/auth/signin`
 - Created `src/types/next-auth.d.ts` — extends `Session` type with `user.id`
 - Build passes with no errors
+
+### 2026-04-21 — Auth Credentials — Email/Password Provider
+- Added Credentials provider to `src/auth.ts` with `credentials` field definitions (email, password) and bcrypt `authorize` logic
+- Password field (`String?`) already existed in User model — no migration needed
+- Created `POST /api/auth/register` at `src/app/api/auth/register/route.ts` — validates fields, checks for existing user, hashes password with bcryptjs (12 rounds), creates user
+- Fixed `proxy.ts` to include `callbackUrl` query param so post-login redirect lands on `/dashboard`
+- Build passes with no errors
