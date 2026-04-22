@@ -12,9 +12,14 @@ interface DashboardShellProps {
   children: React.ReactNode;
   itemTypes: SidebarItemType[];
   sidebarCollections: SidebarCollection[];
+  user: {
+    name: string | null | undefined;
+    email: string | null | undefined;
+    image: string | null | undefined;
+  };
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections }: DashboardShellProps) {
+export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -78,6 +83,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections }: Dash
             collapsed={sidebarCollapsed}
             itemTypes={itemTypes}
             sidebarCollections={sidebarCollections}
+            user={user}
           />
         </aside>
 
@@ -108,6 +114,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections }: Dash
                   onNavigate={() => setMobileOpen(false)}
                   itemTypes={itemTypes}
                   sidebarCollections={sidebarCollections}
+                  user={user}
                 />
               </div>
             </div>

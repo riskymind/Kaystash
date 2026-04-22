@@ -10,13 +10,12 @@ import {
   Image,
   Link as LinkIcon,
   Star,
-  Settings,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { SidebarItemType } from '@/lib/db/items';
 import { SidebarCollection } from '@/lib/db/collections';
+import { UserAvatar } from '@/components/shared/UserAvatar';
 
 const ICON_MAP = {
   Code,
@@ -33,6 +32,11 @@ interface SidebarContentProps {
   onNavigate?: () => void;
   itemTypes: SidebarItemType[];
   sidebarCollections: SidebarCollection[];
+  user: {
+    name: string | null | undefined;
+    email: string | null | undefined;
+    image: string | null | undefined;
+  };
 }
 
 export function SidebarContent({
@@ -40,6 +44,7 @@ export function SidebarContent({
   onNavigate,
   itemTypes,
   sidebarCollections,
+  user,
 }: SidebarContentProps) {
   const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite);
   const otherCollections = sidebarCollections.filter((c) => !c.isFavorite);
@@ -165,25 +170,13 @@ export function SidebarContent({
       </div>
 
       {/* User avatar — bottom */}
-      <div
-        className={cn(
-          'border-t border-border p-3 flex items-center gap-2.5 shrink-0',
-          collapsed && 'justify-center'
-        )}
-      >
-        <Avatar className="size-7 shrink-0">
-          <AvatarImage src={undefined} />
-          <AvatarFallback className="text-[10px] bg-muted">KS</AvatarFallback>
-        </Avatar>
-        {!collapsed && (
-          <>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">Kele</p>
-              <p className="text-[10px] text-muted-foreground truncate">kele@kaystash.io</p>
-            </div>
-            <Settings className="size-3.5 text-muted-foreground shrink-0 cursor-pointer hover:text-foreground transition-colors" />
-          </>
-        )}
+      <div className="border-t border-border p-3 shrink-0">
+        <UserAvatar
+          name={user.name}
+          email={user.email}
+          image={user.image}
+          collapsed={collapsed}
+        />
       </div>
     </div>
   );
