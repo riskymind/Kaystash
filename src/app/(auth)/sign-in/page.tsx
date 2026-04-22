@@ -11,15 +11,19 @@ import { GitBranch } from 'lucide-react';
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
+  const verified = searchParams.get('verified') === 'true';
+  const tokenError = searchParams.get('error');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleCredentials(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setInfo('');
     setLoading(true);
 
     const result = await signIn('credentials', {
@@ -31,7 +35,10 @@ function SignInForm() {
 
     setLoading(false);
 
-    if (result?.error) {
+    if (result?.code === 'email_not_verified') {
+      setError('Please verify your email before signing in.');
+      setInfo(email);
+    } else if (result?.error) {
       setError('Invalid email or password.');
     } else {
       window.location.href = callbackUrl;
@@ -96,12 +103,44 @@ function SignInForm() {
           />
         </div>
 
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {error && (
+          <div className="space-y-1">
+            <p className="text-xs text-destructive">{error}</p>
+            {info && (
+              <p className="text-xs text-muted-foreground">
+                <Link
+                  href={`/verify-email-sent?email=${encodeURIComponent(info)}`}
+                  className="underline underline-offset-4 hover:text-foreground transition-colors"
+                >
+                  Resend verification email
+                </Link>
+              </p>
+            )}
+          </div>
+        )}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
+
+      {verified && (
+        <p className="text-center text-xs text-emerald-500">
+          Email verified! You can now sign in.
+        </p>
+      )}
+
+      {tokenError === 'token_expired' && (
+        <p className="text-center text-xs text-destructive">
+          Your verification link has expired. Please register again or request a new link.
+        </p>
+      )}
+
+      {tokenError === 'invalid_token' && (
+        <p className="text-center text-xs text-destructive">
+          Invalid verification link.
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}

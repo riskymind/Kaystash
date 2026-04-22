@@ -35,7 +35,7 @@ export default function RegisterPage() {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, confirmPassword }),
     });
 
     setLoading(false);
@@ -46,7 +46,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push('/sign-in');
+    router.push(`/verify-email-sent?email=${encodeURIComponent(email)}`);
   }
 
   return (
