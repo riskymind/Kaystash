@@ -1,20 +1,11 @@
-# Current Feature: Auth UI - Sign In, Register & Sign Out
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Replace NextAuth default sign-in page with custom `/sign-in` page (email/password fields + GitHub button + link to register)
-- Build custom `/register` page (name, email, password, confirm password, validation, submit to `/api/auth/register`, redirect to sign-in on success)
-- Update sidebar bottom: show user avatar (GitHub image or initials fallback), user name, dropdown with "Sign out" link, clicking icon navigates to `/profile`
-- Create reusable avatar component that handles both GitHub image and initials cases
-
 ## Notes
-
-- Avatar logic: use `image` field if present (GitHub OAuth), otherwise generate initials from `name` (e.g. "Brad Traversy" → "BT")
-- Sign-in page must support both GitHub OAuth and email/password flows
-- Form validation: passwords match, email format, required fields
 
 ## History
 
@@ -118,4 +109,17 @@ In Progress
 - Password field (`String?`) already existed in User model — no migration needed
 - Created `POST /api/auth/register` at `src/app/api/auth/register/route.ts` — validates fields, checks for existing user, hashes password with bcryptjs (12 rounds), creates user
 - Fixed `proxy.ts` to include `callbackUrl` query param so post-login redirect lands on `/dashboard`
+- Build passes with no errors
+
+### 2026-04-21 — Auth UI — Sign In, Register & Sign Out
+- Installed ShadCN `DropdownMenu` component
+- Created `src/app/(auth)/layout.tsx` — centered auth layout wrapper
+- Created `src/app/(auth)/sign-in/page.tsx` — custom sign-in page with email/password form and GitHub OAuth button; `useSearchParams` wrapped in Suspense boundary
+- Created `src/app/(auth)/register/page.tsx` — custom register page with name, email, password, confirm password fields; validates match and length; posts to `/api/auth/register`; redirects to `/sign-in` on success
+- Created `src/components/shared/UserAvatar.tsx` — reusable avatar component; shows GitHub image or generated initials fallback; dropdown with Profile link and Sign out button
+- Created `src/actions/auth.ts` — `signOutAction` server action calling NextAuth `signOut` with redirect to `/sign-in`
+- Updated `src/auth.config.ts` to add `pages: { signIn: "/sign-in" }` — NextAuth now uses custom page
+- Updated `src/proxy.ts` — unauthenticated redirect now goes to `/sign-in` instead of `/api/auth/signin`
+- Updated `(dashboard)/layout.tsx` — uses `auth()` session to get the real user; removed demo user hardcode
+- Updated `DashboardShell` and `SidebarContent` to accept and render the session user in the avatar area
 - Build passes with no errors
