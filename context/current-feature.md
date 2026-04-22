@@ -1,31 +1,15 @@
-# Current Feature: Email Verification on Register
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- After a user registers, send a verification email via Resend with a unique link
-- User clicks the link to verify their email address
-- Unverified users cannot access the dashboard — redirect them to a "check your email" page
-- Verified users proceed normally after sign-in
-- Store `emailVerified` timestamp on the User model (already exists in schema)
-- Verification tokens stored in the `VerificationToken` model (already exists in schema)
-
 ## Notes
 
-- Use Resend for email delivery; `RESEND_API_KEY` is already in `.env`
-- The `VerificationToken` model (`identifier`, `token`, `expires`) is already in the Prisma schema
-- `emailVerified` field already exists on the `User` model
-- Token should expire after 24 hours
-- Verification link format: `/api/auth/verify-email?token=<token>`
-- After successful verification, set `emailVerified` and redirect to `/sign-in` with a success message
-- GitHub OAuth users skip email verification (already trusted)
-- Create a `/verify-email` pending page shown right after registration
+<!-- Keep this updated. Earliest to latest -->
 
 ## History
-
-<!-- Keep this updated. Earliest to latest -->
 
 ### 2026-04-13 — Initial Next.js Setup
 - Bootstrapped project with `create-next-app` (Next.js 16, React 19, TypeScript, Tailwind CSS v4)
@@ -138,4 +122,18 @@ In Progress
 - Updated `src/proxy.ts` — unauthenticated redirect now goes to `/sign-in` instead of `/api/auth/signin`
 - Updated `(dashboard)/layout.tsx` — uses `auth()` session to get the real user; removed demo user hardcode
 - Updated `DashboardShell` and `SidebarContent` to accept and render the session user in the avatar area
+- Build passes with no errors
+
+### 2026-04-22 — Auth Email Verification
+- Installed `resend` package
+- Created `src/lib/resend.ts` — Resend client + `sendVerificationEmail` (sends from `onboarding@resend.dev`)
+- Created `src/lib/tokens.ts` — `generateVerificationToken`: 32-byte hex token stored in `VerificationToken` table with 24hr expiry; replaces existing token on resend
+- Created `GET /api/auth/verify-email` — validates token, sets `emailVerified`, deletes token, redirects to `/sign-in?verified=true`; redirects with error param on invalid/expired token
+- Created `POST /api/auth/resend-verification` — resends verification email; email-enumeration safe (returns 200 for unknown emails)
+- Created `src/app/(auth)/verify-email-sent/page.tsx` — "Check your email" page with resend button; reads email from query param
+- Updated `src/auth.ts` — Credentials `authorize` throws `"email_not_verified"` error if `emailVerified` is null
+- Updated `src/app/(auth)/register/page.tsx` — sends `confirmPassword` in request body (was missing); redirects to `/verify-email-sent?email=<email>` on success
+- Updated `src/app/(auth)/sign-in/page.tsx` — handles `email_not_verified` error code with "Resend verification email" link; shows success banner on `?verified=true`; shows error on `?error=token_expired` / `?error=invalid_token`
+- Email sending wrapped in try/catch in register route — failure is silent so user still reaches `/verify-email-sent` and can resend
+- Added `scripts/purge-other-users.ts` — deletes all users except a specified email, including their items, collections, accounts and sessions
 - Build passes with no errors
