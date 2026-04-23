@@ -168,3 +168,13 @@ Completed
 - Change password section is conditionally rendered based on `user.hasPassword` — hidden for GitHub OAuth users
 - Route lives inside `(dashboard)` layout — inherits sidebar and authentication guard
 - Build passes with no errors
+
+### 2026-04-23 — Rate Limiting for Auth
+
+- Installed `@upstash/ratelimit` and `@upstash/redis`
+- Created `src/lib/rate-limit.ts` — Upstash Redis client, sliding window limiters for all 5 endpoints, `getIp()` (extracts from `x-forwarded-for`), `checkRateLimit()` (fails open on Redis errors), `makeRateLimitResponse()` (429 + `Retry-After` header)
+- Added rate limiting to `POST /api/auth/register` (3/hr, by IP), `POST /api/auth/forgot-password` (3/hr, by IP), `POST /api/auth/reset-password` (5/15min, by IP), `POST /api/auth/resend-verification` (3/15min, by IP+email)
+- Added login rate limiting inside NextAuth `authorize` (5/15min, by IP+email) — throws `RateLimitedError extends CredentialsSignin` so the `rate_limited` code propagates to the client (plain `Error` is wrapped as `CallbackRouteError` in NextAuth v5 and the code is lost)
+- Also fixed `email_not_verified` with the same `EmailNotVerifiedError extends CredentialsSignin` pattern
+- Updated sign-in page to handle `rate_limited` error code; updated forgot-password and reset-password pages to show the rate limit message from the response body
+- Build passes with no errors
