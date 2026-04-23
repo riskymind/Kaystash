@@ -1,25 +1,11 @@
-# Current Feature: Forgot Password
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Add a "Forgot password?" link to the sign-in page
-- Create a `/forgot-password` page where the user enters their email
-- `POST /api/auth/forgot-password` — generates a reset token in the existing `VerificationToken` table and sends a reset email via Resend
-- Create a `/reset-password` page where the user enters and confirms a new password (reads `token` from query param)
-- `POST /api/auth/reset-password` — validates the token, hashes and saves the new password, deletes the token; handles expired/invalid tokens gracefully
-- Sign-in page shows a success message after requesting a reset (`?reset=sent`)
-
 ## Notes
-
-- Use the existing `VerificationToken` Prisma model (identifier = email, token = 32-byte hex, expires = 1 hr from now)
-- Add `sendPasswordResetEmail` to `src/lib/resend.ts` alongside the existing `sendVerificationEmail`
-- Reuse the `generateVerificationToken` helper from `src/lib/tokens.ts` (identifier will be `reset:<email>` to avoid collisions with email-verification tokens)
-- Email-enumeration safe: always return 200 from the forgot-password endpoint regardless of whether the email exists
-- Token must be deleted after successful password reset
-- If token is expired or invalid redirect to `/reset-password?error=invalid_token`
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -136,6 +122,17 @@ In Progress
 - Updated `src/proxy.ts` — unauthenticated redirect now goes to `/sign-in` instead of `/api/auth/signin`
 - Updated `(dashboard)/layout.tsx` — uses `auth()` session to get the real user; removed demo user hardcode
 - Updated `DashboardShell` and `SidebarContent` to accept and render the session user in the avatar area
+- Build passes with no errors
+
+### 2026-04-23 — Forgot Password
+
+- Added `generatePasswordResetToken` to `src/lib/tokens.ts` — uses `reset:<email>` identifier (avoids collision with email-verification tokens), 1-hour expiry
+- Added `sendPasswordResetEmail` to `src/lib/resend.ts` — branded reset email with link to `/reset-password?token=...`
+- Created `POST /api/auth/forgot-password` — generates token and sends email; email-enumeration safe (always returns 200); only works for credential accounts (has password)
+- Created `POST /api/auth/reset-password` — validates token prefix and expiry, hashes new password, updates user, deletes token
+- Created `/forgot-password` page — email form; shows "check your email" state after submit
+- Created `/reset-password` page — new password + confirm form; reads token from query param; shows actionable error with link to re-request on invalid/expired token
+- Updated sign-in page — "Forgot password?" link above password field; `?reset=sent` success banner after successful reset
 - Build passes with no errors
 
 ### 2026-04-23 — Email Verification Toggle
