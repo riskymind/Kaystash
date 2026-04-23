@@ -1,21 +1,11 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Add an env variable (`EMAIL_VERIFICATION_ENABLED`) to toggle email verification on/off
-- When `false`: registration completes normally without sending a verification email; sign-in works for any registered user without requiring `emailVerified`
-- When `true`: existing email verification flow is fully active (send email → verify token → sign in)
-- No code paths should break regardless of the flag value
-
 ## Notes
-
-- Current blocker: Resend requires a verified domain to send to arbitrary addresses; only the account owner's email can receive emails until a domain is added
-- This flag lets the app be used in dev/staging without that constraint
-- Touch points: `src/app/api/auth/register/route.ts`, `src/auth.ts` (Credentials authorize), possibly `src/app/(auth)/sign-in/page.tsx` (hide the "resend verification" UI when verification is off)
-- Env variable approach agreed; add `EMAIL_VERIFICATION_ENABLED=true` to `.env.example` and default to `true` (safe default for production)
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -132,6 +122,14 @@ In Progress
 - Updated `src/proxy.ts` — unauthenticated redirect now goes to `/sign-in` instead of `/api/auth/signin`
 - Updated `(dashboard)/layout.tsx` — uses `auth()` session to get the real user; removed demo user hardcode
 - Updated `DashboardShell` and `SidebarContent` to accept and render the session user in the avatar area
+- Build passes with no errors
+
+### 2026-04-23 — Email Verification Toggle
+- Added `EMAIL_VERIFICATION_ENABLED` env variable to toggle email verification on/off
+- When `false`: register route skips token generation/email sending and sets `emailVerified: new Date()` so the user can sign in immediately; Credentials `authorize` skips the `emailVerified` check
+- When `true` (default): full existing flow is active — send verification email → verify token → sign in
+- Register page reads `emailVerificationRequired` from the API response and redirects to `/verify-email-sent` or `/sign-in` accordingly
+- `.env` set to `false` for local dev; `.env.example` documents `true` as the production default
 - Build passes with no errors
 
 ### 2026-04-22 — Auth Email Verification
