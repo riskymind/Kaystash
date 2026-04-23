@@ -3,11 +3,16 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/resend";
+import { checkRateLimit, getIp, makeRateLimitResponse } from "@/lib/rate-limit";
 
 const EMAIL_VERIFICATION_ENABLED =
   process.env.EMAIL_VERIFICATION_ENABLED !== "false";
 
 export async function POST(request: Request) {
+  const ip = getIp(request);
+  const rl = await checkRateLimit("register", ip);
+  if (!rl.success) return makeRateLimitResponse(rl.reset);
+
   const body = await request.json();
   const { name, email, password, confirmPassword } = body as {
     name: string;

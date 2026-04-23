@@ -47,7 +47,7 @@ function ResetPasswordForm() {
       } else if (data.error === 'invalid_token') {
         setError('Invalid reset link. Please request a new one.');
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(data.error ?? 'Something went wrong. Please try again.');
       }
       return;
     }

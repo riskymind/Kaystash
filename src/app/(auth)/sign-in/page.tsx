@@ -36,7 +36,9 @@ function SignInForm() {
 
     setLoading(false);
 
-    if (result?.code === 'email_not_verified') {
+    if (result?.code === 'rate_limited') {
+      setError('Too many sign-in attempts. Please wait a few minutes and try again.');
+    } else if (result?.code === 'email_not_verified') {
       setError('Please verify your email before signing in.');
       setInfo(email);
     } else if (result?.error) {
