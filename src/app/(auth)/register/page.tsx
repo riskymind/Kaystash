@@ -46,7 +46,12 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push(`/verify-email-sent?email=${encodeURIComponent(email)}`);
+    const data = await res.json().catch(() => ({}));
+    if (data.emailVerificationRequired) {
+      router.push(`/verify-email-sent?email=${encodeURIComponent(email)}`);
+    } else {
+      router.push('/sign-in');
+    }
   }
 
   return (

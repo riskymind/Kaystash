@@ -1,11 +1,21 @@
-# Current Feature
+# Current Feature: Email Verification Toggle
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Add an env variable (`EMAIL_VERIFICATION_ENABLED`) to toggle email verification on/off
+- When `false`: registration completes normally without sending a verification email; sign-in works for any registered user without requiring `emailVerified`
+- When `true`: existing email verification flow is fully active (send email → verify token → sign in)
+- No code paths should break regardless of the flag value
+
 ## Notes
+
+- Current blocker: Resend requires a verified domain to send to arbitrary addresses; only the account owner's email can receive emails until a domain is added
+- This flag lets the app be used in dev/staging without that constraint
+- Touch points: `src/app/api/auth/register/route.ts`, `src/auth.ts` (Credentials authorize), possibly `src/app/(auth)/sign-in/page.tsx` (hide the "resend verification" UI when verification is off)
+- Env variable approach agreed; add `EMAIL_VERIFICATION_ENABLED=true` to `.env.example` and default to `true` (safe default for production)
 
 <!-- Keep this updated. Earliest to latest -->
 
