@@ -12,6 +12,7 @@ function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
   const verified = searchParams.get('verified') === 'true';
+  const resetSent = searchParams.get('reset') === 'sent';
   const tokenError = searchParams.get('error');
 
   const [email, setEmail] = useState('');
@@ -89,9 +90,17 @@ function SignInForm() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"
@@ -127,6 +136,12 @@ function SignInForm() {
       {verified && (
         <p className="text-center text-xs text-emerald-500">
           Email verified! You can now sign in.
+        </p>
+      )}
+
+      {resetSent && (
+        <p className="text-center text-xs text-emerald-500">
+          Password reset successfully. You can now sign in with your new password.
         </p>
       )}
 
