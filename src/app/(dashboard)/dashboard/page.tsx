@@ -10,12 +10,14 @@ import {
   Pin,
   Box,
   FolderOpen,
+  FolderPlus,
   Heart,
   Bookmark,
 } from 'lucide-react';
 import { getDashboardCollections, getDashboardStats, CollectionForDashboard } from '@/lib/db/collections';
 import { getPinnedItems, getRecentItems, ItemForDashboard } from '@/lib/db/items';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
 // ─── Icon / color map ────────────────────────────────────────────────────────
 
@@ -161,22 +163,15 @@ function ItemRow({ item }: { item: ItemForDashboard }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
-  // TODO: replace with session user once auth is wired up
-  const demoUser = await prisma.user.findUnique({ where: { email: 'kele@kaystash.io' } });
+  const session = await auth();
+  if (!session?.user?.id) redirect('/sign-in');
 
-  const [collections, stats, pinnedItems, recentItems] = demoUser
-    ? await Promise.all([
-        getDashboardCollections(demoUser.id),
-        getDashboardStats(demoUser.id),
-        getPinnedItems(demoUser.id),
-        getRecentItems(demoUser.id),
-      ])
-    : [
-        [],
-        { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 },
-        [],
-        [],
-      ];
+  const [collections, stats, pinnedItems, recentItems] = await Promise.all([
+    getDashboardCollections(session.user.id),
+    getDashboardStats(session.user.id),
+    getPinnedItems(session.user.id),
+    getRecentItems(session.user.id),
+  ]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
@@ -200,9 +195,15 @@ export default async function DashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold">Collections</h2>
-          <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            View all
-          </button>
+          <div className="flex items-center gap-3">
+            <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              View all
+            </button>
+            <button className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
+              <FolderPlus className="size-3.5" />
+              New Collection
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {collections.map((col) => (
