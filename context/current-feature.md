@@ -1,11 +1,25 @@
-# Current Feature
+# Current Feature: Forgot Password
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Add a "Forgot password?" link to the sign-in page
+- Create a `/forgot-password` page where the user enters their email
+- `POST /api/auth/forgot-password` — generates a reset token in the existing `VerificationToken` table and sends a reset email via Resend
+- Create a `/reset-password` page where the user enters and confirms a new password (reads `token` from query param)
+- `POST /api/auth/reset-password` — validates the token, hashes and saves the new password, deletes the token; handles expired/invalid tokens gracefully
+- Sign-in page shows a success message after requesting a reset (`?reset=sent`)
+
 ## Notes
+
+- Use the existing `VerificationToken` Prisma model (identifier = email, token = 32-byte hex, expires = 1 hr from now)
+- Add `sendPasswordResetEmail` to `src/lib/resend.ts` alongside the existing `sendVerificationEmail`
+- Reuse the `generateVerificationToken` helper from `src/lib/tokens.ts` (identifier will be `reset:<email>` to avoid collisions with email-verification tokens)
+- Email-enumeration safe: always return 200 from the forgot-password endpoint regardless of whether the email exists
+- Token must be deleted after successful password reset
+- If token is expired or invalid redirect to `/reset-password?error=invalid_token`
 
 <!-- Keep this updated. Earliest to latest -->
 
