@@ -1,23 +1,11 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Create profile page at `/profile` route (protected)
-- Display user info: email, name, avatar (GitHub image or initials fallback), account creation date
-- Show usage stats: total items, total collections, item count breakdown by type
-- Add change password form — email/password users only (hidden for GitHub OAuth users)
-- Add delete account button with confirmation dialog to prevent accidental deletion
-
 ## Notes
-
-- Avatar: use GitHub image from OAuth if available, otherwise generate initials from name/email (same logic as `UserAvatar` component)
-- Change password section should be conditionally rendered — only for users who have a `password` field set (credential accounts), not GitHub OAuth users
-- Delete account confirmation dialog should require an explicit action (not just "OK")
-- Item type breakdown covers all 7 system types: snippets, prompts, notes, commands, links, files, images
-- Route must be protected — redirect unauthenticated users to `/sign-in`
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -167,4 +155,16 @@ In Progress
 - Updated `src/app/(auth)/sign-in/page.tsx` — handles `email_not_verified` error code with "Resend verification email" link; shows success banner on `?verified=true`; shows error on `?error=token_expired` / `?error=invalid_token`
 - Email sending wrapped in try/catch in register route — failure is silent so user still reaches `/verify-email-sent` and can resend
 - Added `scripts/purge-other-users.ts` — deletes all users except a specified email, including their items, collections, accounts and sessions
+- Build passes with no errors
+
+### 2026-04-23 — Profile Page
+
+- Created `src/lib/db/profile.ts` with `getProfileUser` (returns user info + `hasPassword` flag) and `getProfileStats` (total items, total collections, per-type breakdown)
+- Created `src/actions/profile.ts` — `changePasswordAction` (validates current password with bcrypt, hashes new password) and `deleteAccountAction` (deletes user row, triggers NextAuth sign-out)
+- Installed ShadCN `Dialog` component (`src/components/ui/dialog.tsx`) — uses `@base-ui/react/dialog`
+- Created `src/components/profile/ChangePasswordForm.tsx` — client form with current/new/confirm fields; validates length and match before calling server action
+- Created `src/components/profile/DeleteAccountDialog.tsx` — requires user to type `delete my account` before destructive action is allowed
+- Created `src/app/(dashboard)/profile/page.tsx` — server component; fetches user + stats via `Promise.all`; renders account info, usage stats grid, type breakdown, change password (credential users only), and danger zone
+- Change password section is conditionally rendered based on `user.hasPassword` — hidden for GitHub OAuth users
+- Route lives inside `(dashboard)` layout — inherits sidebar and authentication guard
 - Build passes with no errors
