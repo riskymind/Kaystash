@@ -1,28 +1,11 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Edit button in the item drawer action bar toggles inline edit mode (same drawer stays open)
-- In edit mode, action bar is replaced with Save and Cancel buttons
-- Cancel discards changes, returns to view mode
-- Save calls server action, returns to view mode, refreshes drawer data, and shows toast
-- Editable fields for all types: title (required), description, tags (comma-separated)
-- Type-specific fields: content (snippet/prompt/command/note), language (snippet/command), url (link)
-- Non-editable in edit mode: item type, collections, dates
-- `updateItem` server action in `src/actions/items.ts` with Zod validation and ownership check
-- `updateItem` query function in `src/lib/db/items.ts` — disconnects all tags, connect-or-creates new ones, returns updated `ItemDetail`
-- `router.refresh()` after save so the card list reflects changes
-
 ## Notes
-
-- No form library — use controlled inputs with local state
-- Disable Save when title is empty (client-side guard)
-- Zod validates all fields server-side (source of truth); return Zod errors in `{ success: false, error }` 
-- Content textarea does not need to be a code editor
-- Collections management is out of scope for this feature
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -222,4 +205,12 @@ In Progress
 - Added login rate limiting inside NextAuth `authorize` (5/15min, by IP+email) — throws `RateLimitedError extends CredentialsSignin` so the `rate_limited` code propagates to the client (plain `Error` is wrapped as `CallbackRouteError` in NextAuth v5 and the code is lost)
 - Also fixed `email_not_verified` with the same `EmailNotVerifiedError extends CredentialsSignin` pattern
 - Updated sign-in page to handle `rate_limited` error code; updated forgot-password and reset-password pages to show the rate limit message from the response body
+- Build passes with no errors
+
+### 2026-04-24 — Item Drawer Edit Mode
+
+- Added `updateItemInDb` to `src/lib/db/items.ts` — disconnects all existing tags (`set: []`), connect-or-creates new tag list, returns updated `ItemDetail`
+- Added `updateItemAction` to `src/actions/items.ts` — Zod schema with URL validation, auth + ownership check, returns `{ success: true, data: ItemDetail }` or `{ success: false, error, fieldErrors }`
+- Updated `src/components/items/ItemDrawer.tsx` — pencil button toggles inline edit mode; action bar replaced with Save/Cancel; controlled inputs for title, description, tags (all types) and content, language, URL (type-specific); Save disabled when title is empty; on success updates local state from response, fires toast, and calls `router.refresh()`
+- Collections and dates are display-only in edit mode; item type is never editable
 - Build passes with no errors
