@@ -169,6 +169,13 @@ Completed
 - Route lives inside `(dashboard)` layout — inherits sidebar and authentication guard
 - Build passes with no errors
 
+### 2026-04-24 — Items List View
+
+- Added `typeSlugToName` helper and `getItemsByType` function to `src/lib/db/items.ts` — maps plural URL slug to DB type name (e.g. `snippets` → `snippet`), fetches user's items filtered by type
+- Created `src/components/items/ItemCard.tsx` — card with colored left border, type icon, title, description (2-line clamp), tags (up to 3), favorite/pin indicators, and date
+- Created `src/app/(dashboard)/items/[type]/page.tsx` — server component; auth-guards via `auth()`; returns 404 for unknown type slugs; renders 1-col (mobile) / 2-col (md+) grid of `ItemCard`s with empty state
+- Build passes with no errors
+
 ### 2026-04-23 — Rate Limiting for Auth
 
 - Installed `@upstash/ratelimit` and `@upstash/redis`
