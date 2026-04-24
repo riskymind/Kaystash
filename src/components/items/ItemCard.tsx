@@ -28,14 +28,21 @@ function formatDate(iso: string | Date) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function ItemCard({ item }: { item: ItemForDashboard }) {
+export function ItemCard({
+  item,
+  onClick,
+}: {
+  item: ItemForDashboard;
+  onClick?: (id: string) => void;
+}) {
   const Icon = ICON_MAP[item.itemType.icon as IconName] ?? Box;
   const color = item.itemType.color;
 
   return (
     <div
-      className="rounded-lg border border-border bg-card p-4 hover:bg-muted/20 transition-colors"
+      className="rounded-lg border border-border bg-card p-4 hover:bg-muted/20 transition-colors cursor-pointer"
       style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
+      onClick={() => onClick?.(item.id)}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-1">

@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getItemsByType, typeSlugToName } from '@/lib/db/items';
-import { ItemCard } from '@/components/items/ItemCard';
+import { ItemCardsWithDrawer } from '@/components/items/ItemCardsWithDrawer';
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -33,11 +33,7 @@ export default async function ItemsListPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {label.toLowerCase()} yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {items.map((item) => (
-            <ItemCard key={item.id} item={item} />
-          ))}
-        </div>
+        <ItemCardsWithDrawer items={items} />
       )}
     </div>
   );

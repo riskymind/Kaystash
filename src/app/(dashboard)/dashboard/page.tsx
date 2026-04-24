@@ -15,9 +15,10 @@ import {
   Bookmark,
 } from 'lucide-react';
 import { getDashboardCollections, getDashboardStats, CollectionForDashboard } from '@/lib/db/collections';
-import { getPinnedItems, getRecentItems, ItemForDashboard } from '@/lib/db/items';
+import { getPinnedItems, getRecentItems } from '@/lib/db/items';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { ItemRowsWithDrawer } from '@/components/items/ItemRowsWithDrawer';
 
 // ─── Icon / color map ────────────────────────────────────────────────────────
 
@@ -32,12 +33,6 @@ const ICON_MAP = {
 } as const;
 
 type IconName = keyof typeof ICON_MAP;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(iso: string | Date) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -108,58 +103,6 @@ function CollectionCard({ col }: { col: CollectionForDashboard }) {
   );
 }
 
-function ItemRow({ item }: { item: ItemForDashboard }) {
-  const Icon = ICON_MAP[item.itemType.icon as IconName] ?? Box;
-  const color = item.itemType.color;
-
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
-      {/* Type icon */}
-      <div
-        className="size-8 rounded-md flex items-center justify-center shrink-0 mt-0.5"
-        style={{ backgroundColor: `${color}20`, color }}
-      >
-        <Icon className="size-3.5" />
-      </div>
-
-      {/* Body */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-sm font-medium truncate">{item.title}</span>
-          {item.isFavorite && (
-            <Star className="size-3 fill-yellow-400 text-yellow-400 shrink-0" />
-          )}
-          {item.isPinned && (
-            <Pin className="size-3 text-muted-foreground shrink-0" />
-          )}
-        </div>
-        {item.description && (
-          <p className="text-xs text-muted-foreground truncate mb-1.5">
-            {item.description}
-          </p>
-        )}
-        {item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {item.tags.slice(0, 4).map((tag) => (
-              <span
-                key={tag}
-                className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Date */}
-      <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
-        {formatDate(item.createdAt)}
-      </span>
-    </div>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
@@ -219,22 +162,14 @@ export default async function DashboardPage() {
             <Pin className="size-3.5 text-muted-foreground" />
             <h2 className="text-sm font-semibold">Pinned</h2>
           </div>
-          <div className="rounded-lg border border-border bg-card px-4">
-            {pinnedItems.map((item) => (
-              <ItemRow key={item.id} item={item} />
-            ))}
-          </div>
+          <ItemRowsWithDrawer items={pinnedItems} />
         </section>
       )}
 
       {/* Recent items */}
       <section>
         <h2 className="text-sm font-semibold mb-4">Recent Items</h2>
-        <div className="rounded-lg border border-border bg-card px-4">
-          {recentItems.map((item) => (
-            <ItemRow key={item.id} item={item} />
-          ))}
-        </div>
+        <ItemRowsWithDrawer items={recentItems} />
       </section>
     </div>
   );

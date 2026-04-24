@@ -113,6 +113,66 @@ export async function getItemsByType(userId: string, typeName: string): Promise<
   }));
 }
 
+export type ItemDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  contentType: string;
+  isFavorite: boolean;
+  isPinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: string[];
+  collections: { id: string; name: string }[];
+  itemType: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+};
+
+export async function getItemDetail(itemId: string, userId: string): Promise<ItemDetail | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    include: {
+      itemType: true,
+      tags: true,
+      collections: {
+        include: { collection: { select: { id: true, name: true } } },
+      },
+    },
+  });
+
+  if (!item) return null;
+
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    content: item.content,
+    url: item.url,
+    language: item.language,
+    contentType: item.contentType,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    tags: item.tags.map((t) => t.name),
+    collections: item.collections.map((ic) => ({
+      id: ic.collection.id,
+      name: ic.collection.name,
+    })),
+    itemType: {
+      name: item.itemType.name,
+      icon: item.itemType.icon,
+      color: item.itemType.color,
+    },
+  };
+}
+
 export type CreateItemInput = {
   title: string;
   description?: string;
