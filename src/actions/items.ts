@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createItemInDb, updateItemInDb, ItemDetail } from '@/lib/db/items';
+import { createItemInDb, updateItemInDb, deleteItemInDb, ItemDetail } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
 
 const CONTENT_TYPES = {
@@ -140,4 +140,16 @@ export async function updateItemAction(
   if (!updated) return { success: false, error: 'Item not found or access denied.' };
 
   return { success: true, data: updated };
+}
+
+type DeleteActionResult = { success: true } | { success: false; error: string };
+
+export async function deleteItemAction(itemId: string): Promise<DeleteActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const deleted = await deleteItemInDb(itemId, session.user.id);
+  if (!deleted) return { success: false, error: 'Item not found or access denied.' };
+
+  return { success: true };
 }

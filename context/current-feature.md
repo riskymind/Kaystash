@@ -1,11 +1,23 @@
-# Current Feature
+# Current Feature: Item Delete
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Add `deleteItemInDb` function to `src/lib/db/items.ts` — deletes item by ID with ownership check
+- Add `deleteItemAction` server action to `src/actions/items.ts` — auth + ownership check, returns `{ success }` or `{ error }`
+- Add a ShadCN `AlertDialog` confirmation before deleting (e.g., "Are you sure you want to delete this item? This action cannot be undone.")
+- Show a success toast via `sonner` after deletion
+- On success, close the drawer and call `router.refresh()` to update the item list
+- Delete button already exists in `ItemDrawer.tsx` action bar — wire it up
+
 ## Notes
+
+- Use ShadCN `AlertDialog` component (may need to install if not present)
+- The delete button in `ItemDrawer.tsx` should trigger the confirmation dialog
+- After deletion the drawer should close and the item should disappear from the list
+- Keep consistent with existing `{ success, error }` pattern used in other actions
 
 <!-- Keep this updated. Earliest to latest -->
 

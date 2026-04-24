@@ -252,6 +252,13 @@ export async function updateItemInDb(
   };
 }
 
+export async function deleteItemInDb(itemId: string, userId: string): Promise<boolean> {
+  const existing = await prisma.item.findFirst({ where: { id: itemId, userId } });
+  if (!existing) return false;
+  await prisma.item.delete({ where: { id: itemId } });
+  return true;
+}
+
 export async function createItemInDb(input: CreateItemInput) {
   const { tags, userId, ...rest } = input;
 

@@ -28,8 +28,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ItemDetail } from '@/lib/db/items';
-import { updateItemAction } from '@/actions/items';
+import { updateItemAction, deleteItemAction } from '@/actions/items';
 
 const ICON_MAP = {
   Code,
@@ -116,6 +127,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState<EditState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
@@ -182,6 +194,20 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     setItem(result.data);
     setIsEditing(false);
     toast.success('Item saved.');
+    router.refresh();
+  }
+
+  async function handleDelete() {
+    if (!item) return;
+    setDeleting(true);
+    const result = await deleteItemAction(item.id);
+    setDeleting(false);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success('Item deleted.');
+    onClose();
     router.refresh();
   }
 
@@ -280,12 +306,36 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 >
                   <Pencil className="size-3.5" />
                 </button>
-                <button
-                  className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                  title="Delete"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    render={
+                      <button
+                        className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        title="Delete"
+                        disabled={deleting}
+                      />
+                    }
+                  >
+                    <Trash2 className="size-3.5" />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete item?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete &ldquo;{item.title}&rdquo;. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? 'Deleting…' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 
