@@ -1,27 +1,11 @@
-# Current Feature: Item Create
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- "New Item" button in the top bar opens a modal dialog
-- Type selector with snippet, prompt, command, note, link options
-- Fields shown dynamically based on selected type:
-  - All types: title (required), description, tags
-  - snippet/command: content, language
-  - prompt/note: content
-  - link: URL (required)
-- Server action `createItem` with Zod validation
-- Query function `createItem` in `lib/db/items.ts`
-- Toast on success; modal closes and page refreshes
-
 ## Notes
-
-- Use shadcn Dialog component
-- File and image types are Pro-only — exclude from the type selector for now
-- Follow existing patterns: server action returns `{ success, data, error }`, client form calls action
-- Zod schema lives in the server action file or a shared types file
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -190,6 +174,15 @@ In Progress
 - Added `typeSlugToName` helper and `getItemsByType` function to `src/lib/db/items.ts` — maps plural URL slug to DB type name (e.g. `snippets` → `snippet`), fetches user's items filtered by type
 - Created `src/components/items/ItemCard.tsx` — card with colored left border, type icon, title, description (2-line clamp), tags (up to 3), favorite/pin indicators, and date
 - Created `src/app/(dashboard)/items/[type]/page.tsx` — server component; auth-guards via `auth()`; returns 404 for unknown type slugs; renders 1-col (mobile) / 2-col (md+) grid of `ItemCard`s with empty state
+- Build passes with no errors
+
+### 2026-04-24 — Item Create
+
+- Installed `zod` and `sonner`; added `<Toaster richColors position="bottom-right" />` to root layout
+- Added `CreateItemInput` type and `createItemInDb` function to `src/lib/db/items.ts` — creates item with tag `connectOrCreate`
+- Created `src/actions/items.ts` — `createItemAction` server action with Zod schema; validates required fields per type (URL required for link), maps type name to `contentType`, resolves `itemTypeId` from DB
+- Created `src/components/items/NewItemDialog.tsx` — Dialog with 5-type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet+command, content for prompt+note, URL for link), comma-separated tags, toast on success, `router.refresh()` to update the page
+- Updated `DashboardShell` — "New Item" button now opens the dialog
 - Build passes with no errors
 
 ### 2026-04-23 — Rate Limiting for Auth
