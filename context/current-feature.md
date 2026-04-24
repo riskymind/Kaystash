@@ -1,25 +1,11 @@
-# Current Feature: Item Drawer
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Clicking an `ItemCard` opens a right-side Sheet drawer with that item's full details
-- Drawer works on both the dashboard page and items list pages
-- Action bar includes: Favorite (star, yellow when active), Pin, Copy, Edit (pencil), and Delete (trash, right-aligned)
-- Full item data (content, collections, language, etc.) fetched on click via `GET /api/items/[id]`
-- Drawer shows a skeleton/loading state while fetching
-- Client wrapper component manages drawer state so server component pages remain unchanged
-- No page navigation — feels snappy, in-place slide-in
-
 ## Notes
-
-- Use ShadCN `Sheet` component, opens from the right
-- Card data (title, description, tags) already fetched by server component — only full detail fetched on click
-- Query function lives in `src/lib/db/items.ts`, API route calls it with auth check
-- Drawer reference: `context/screenshots/dashboard-ui-drawer.png`
-- Code editor and item-type-specific content fields come in a later feature — this spec covers the base drawer + action bar only
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -197,6 +183,18 @@ In Progress
 - Created `src/actions/items.ts` — `createItemAction` server action with Zod schema; validates required fields per type (URL required for link), maps type name to `contentType`, resolves `itemTypeId` from DB
 - Created `src/components/items/NewItemDialog.tsx` — Dialog with 5-type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet+command, content for prompt+note, URL for link), comma-separated tags, toast on success, `router.refresh()` to update the page
 - Updated `DashboardShell` — "New Item" button now opens the dialog
+- Build passes with no errors
+
+### 2026-04-24 — Item Drawer
+
+- Added `ItemDetail` type and `getItemDetail` function to `src/lib/db/items.ts` — fetches full item with content, URL, language, tags, and collections
+- Created `GET /api/items/[id]` — auth-checked route returning full item detail; 401 for unauthenticated, 404 for not found
+- Created `src/components/items/ItemDrawer.tsx` — right-side Sheet with skeleton loading state, type badge + language badge in header, action bar (Favorite/Pin/Copy/Edit/Delete), and sections for description, content (monospace pre), URL, tags, collections, and created/updated dates
+- Created `src/components/items/ItemCardsWithDrawer.tsx` — client wrapper managing drawer state for the items list grid; renders `ItemCard` grid + `ItemDrawer`
+- Created `src/components/items/ItemRowsWithDrawer.tsx` — client wrapper for dashboard row lists (pinned + recent); includes inline `ItemRow` with click handler
+- Updated `ItemCard` — added optional `onClick?: (id: string) => void` prop; card is `cursor-pointer`
+- Updated `/items/[type]` page — replaced raw grid with `ItemCardsWithDrawer`
+- Updated `/dashboard` page — removed inline `ItemRow` component, replaced pinned and recent sections with `ItemRowsWithDrawer`
 - Build passes with no errors
 
 ### 2026-04-23 — Rate Limiting for Auth
