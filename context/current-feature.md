@@ -1,23 +1,11 @@
-# Current Feature: Item Delete
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Add `deleteItemInDb` function to `src/lib/db/items.ts` — deletes item by ID with ownership check
-- Add `deleteItemAction` server action to `src/actions/items.ts` — auth + ownership check, returns `{ success }` or `{ error }`
-- Add a ShadCN `AlertDialog` confirmation before deleting (e.g., "Are you sure you want to delete this item? This action cannot be undone.")
-- Show a success toast via `sonner` after deletion
-- On success, close the drawer and call `router.refresh()` to update the item list
-- Delete button already exists in `ItemDrawer.tsx` action bar — wire it up
-
 ## Notes
-
-- Use ShadCN `AlertDialog` component (may need to install if not present)
-- The delete button in `ItemDrawer.tsx` should trigger the confirmation dialog
-- After deletion the drawer should close and the item should disappear from the list
-- Keep consistent with existing `{ success, error }` pattern used in other actions
 
 <!-- Keep this updated. Earliest to latest -->
 
@@ -217,6 +205,15 @@ In Progress
 - Added login rate limiting inside NextAuth `authorize` (5/15min, by IP+email) — throws `RateLimitedError extends CredentialsSignin` so the `rate_limited` code propagates to the client (plain `Error` is wrapped as `CallbackRouteError` in NextAuth v5 and the code is lost)
 - Also fixed `email_not_verified` with the same `EmailNotVerifiedError extends CredentialsSignin` pattern
 - Updated sign-in page to handle `rate_limited` error code; updated forgot-password and reset-password pages to show the rate limit message from the response body
+- Build passes with no errors
+
+### 2026-04-24 — Item Delete
+
+- Added `deleteItemInDb` to `src/lib/db/items.ts` — deletes item by ID with ownership check via `findFirst` before `delete`
+- Added `deleteItemAction` to `src/actions/items.ts` — auth + ownership check, returns `{ success: true }` or `{ success: false, error }`
+- Installed ShadCN `AlertDialog` component (`src/components/ui/alert-dialog.tsx`) — uses `@base-ui/react/alert-dialog`
+- Updated `src/components/items/ItemDrawer.tsx` — delete button opens `AlertDialog` confirmation with item title; on confirm calls `deleteItemAction`, fires success toast, closes drawer, and calls `router.refresh()`
+- Used `render` prop on `AlertDialogTrigger` (Base UI pattern) instead of `asChild` (Radix UI pattern)
 - Build passes with no errors
 
 ### 2026-04-24 — Item Drawer Edit Mode
