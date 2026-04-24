@@ -185,6 +185,73 @@ export type CreateItemInput = {
   userId: string;
 };
 
+export type UpdateItemInput = {
+  title: string;
+  description?: string | null;
+  content?: string | null;
+  url?: string | null;
+  language?: string | null;
+  tags: string[];
+};
+
+export async function updateItemInDb(
+  itemId: string,
+  userId: string,
+  input: UpdateItemInput,
+): Promise<ItemDetail | null> {
+  const { tags, ...rest } = input;
+
+  const existing = await prisma.item.findFirst({ where: { id: itemId, userId } });
+  if (!existing) return null;
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: {
+      ...rest,
+      tags: {
+        set: [],
+        connectOrCreate: tags
+          .filter((t) => t.trim().length > 0)
+          .map((name) => ({
+            where: { name: name.trim().toLowerCase() },
+            create: { name: name.trim().toLowerCase() },
+          })),
+      },
+    },
+    include: {
+      itemType: true,
+      tags: true,
+      collections: {
+        include: { collection: { select: { id: true, name: true } } },
+      },
+    },
+  });
+
+  return {
+    id: updated.id,
+    title: updated.title,
+    description: updated.description,
+    content: updated.content,
+    url: updated.url,
+    language: updated.language,
+    contentType: updated.contentType,
+    isFavorite: updated.isFavorite,
+    isPinned: updated.isPinned,
+    createdAt: updated.createdAt,
+    updatedAt: updated.updatedAt,
+    tags: updated.tags.map((t) => t.name),
+    collections: updated.collections.map((ic) => ({
+      id: ic.collection.id,
+      name: ic.collection.name,
+    })),
+    itemType: {
+      name: updated.itemType.name,
+      icon: updated.itemType.icon,
+      color: updated.itemType.color,
+    },
+  };
+}
+
 export async function createItemInDb(input: CreateItemInput) {
   const { tags, userId, ...rest } = input;
 
