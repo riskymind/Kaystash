@@ -1,5 +1,20 @@
 import { prisma } from '@/lib/prisma';
 
+// Slug → DB name map (URL uses plural, DB stores singular)
+const TYPE_SLUG_MAP: Record<string, string> = {
+  snippets: 'snippet',
+  prompts: 'prompt',
+  commands: 'command',
+  notes: 'note',
+  files: 'file',
+  images: 'image',
+  links: 'link',
+};
+
+export function typeSlugToName(slug: string): string | null {
+  return TYPE_SLUG_MAP[slug] ?? null;
+}
+
 export type SidebarItemType = {
   id: string;
   name: string;
@@ -47,6 +62,35 @@ export async function getPinnedItems(userId: string): Promise<ItemForDashboard[]
   const items = await prisma.item.findMany({
     where: { userId, isPinned: true },
     orderBy: { updatedAt: 'desc' },
+    include: {
+      itemType: true,
+      tags: true,
+    },
+  });
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    createdAt: item.createdAt,
+    tags: item.tags.map((t) => t.name),
+    itemType: {
+      name: item.itemType.name,
+      icon: item.itemType.icon,
+      color: item.itemType.color,
+    },
+  }));
+}
+
+export async function getItemsByType(userId: string, typeName: string): Promise<ItemForDashboard[]> {
+  const items = await prisma.item.findMany({
+    where: {
+      userId,
+      itemType: { name: typeName },
+    },
+    orderBy: { createdAt: 'desc' },
     include: {
       itemType: true,
       tags: true,
