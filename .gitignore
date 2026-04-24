@@ -42,3 +42,8 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated/
+
+# claude code
+.claude/
+.mcp.json
+.playwright-mcp/
