@@ -1,0 +1,178 @@
+'use client';
+
+import { useRef, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Code, Sparkles, Terminal, StickyNote, Link } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { createItemAction } from '@/actions/items';
+
+const ITEM_TYPES = [
+  { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
+  { name: 'prompt', label: 'Prompt', icon: Sparkles, color: '#8b5cf6' },
+  { name: 'command', label: 'Command', icon: Terminal, color: '#f97316' },
+  { name: 'note', label: 'Note', icon: StickyNote, color: '#fde047' },
+  { name: 'link', label: 'Link', icon: Link, color: '#10b981' },
+] as const;
+
+type ItemTypeName = (typeof ITEM_TYPES)[number]['name'];
+
+const LANGUAGES = ['TypeScript', 'JavaScript', 'Python', 'Go', 'Rust', 'Shell', 'SQL', 'Other'];
+
+interface NewItemDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [selectedType, setSelectedType] = useState<ItemTypeName>('snippet');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [isPending, startTransition] = useTransition();
+
+  const showContent = selectedType !== 'link';
+  const showLanguage = selectedType === 'snippet' || selectedType === 'command';
+  const showUrl = selectedType === 'link';
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      formRef.current?.reset();
+      setSelectedType('snippet');
+      setFieldErrors({});
+    }
+    onOpenChange(next);
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.set('type', selectedType);
+
+    startTransition(async () => {
+      const result = await createItemAction(formData);
+      if (result.success) {
+        toast.success('Item created');
+        handleOpenChange(false);
+        router.refresh();
+      } else {
+        if (result.fieldErrors) {
+          setFieldErrors(result.fieldErrors);
+        }
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>New Item</DialogTitle>
+        </DialogHeader>
+
+        {/* Type selector */}
+        <div className="flex gap-1.5 flex-wrap">
+          {ITEM_TYPES.map(({ name, label, icon: Icon, color }) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setSelectedType(name)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                selectedType === name
+                  ? 'border-transparent bg-muted'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:border-border/80'
+              }`}
+            >
+              <Icon className="size-3.5" style={{ color }} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-3">
+          {/* Title */}
+          <div className="flex flex-col gap-1">
+            <Input
+              name="title"
+              placeholder="Title *"
+              className="h-8 text-sm"
+              required
+            />
+            {fieldErrors.title && (
+              <p className="text-xs text-destructive">{fieldErrors.title[0]}</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <Input
+            name="description"
+            placeholder="Description (optional)"
+            className="h-8 text-sm"
+          />
+
+          {/* URL — link type only */}
+          {showUrl && (
+            <div className="flex flex-col gap-1">
+              <Input
+                name="url"
+                placeholder="URL *"
+                className="h-8 text-sm"
+                type="url"
+              />
+              {fieldErrors.url && (
+                <p className="text-xs text-destructive">{fieldErrors.url[0]}</p>
+              )}
+            </div>
+          )}
+
+          {/* Content — all non-link types */}
+          {showContent && (
+            <textarea
+              name="content"
+              placeholder="Content (optional)"
+              rows={4}
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+            />
+          )}
+
+          {/* Language — snippet and command only */}
+          {showLanguage && (
+            <select
+              name="language"
+              className="h-8 w-full rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="">Language (optional)</option>
+              {LANGUAGES.map((lang) => (
+                <option key={lang} value={lang.toLowerCase()}>
+                  {lang}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Tags */}
+          <Input
+            name="tags"
+            placeholder="Tags (comma-separated)"
+            className="h-8 text-sm"
+          />
+
+          <DialogFooter showCloseButton>
+            <Button type="submit" size="sm" disabled={isPending}>
+              {isPending ? 'Saving…' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

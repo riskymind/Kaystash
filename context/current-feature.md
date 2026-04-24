@@ -1,11 +1,27 @@
-# Current Feature
+# Current Feature: Item Create
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- "New Item" button in the top bar opens a modal dialog
+- Type selector with snippet, prompt, command, note, link options
+- Fields shown dynamically based on selected type:
+  - All types: title (required), description, tags
+  - snippet/command: content, language
+  - prompt/note: content
+  - link: URL (required)
+- Server action `createItem` with Zod validation
+- Query function `createItem` in `lib/db/items.ts`
+- Toast on success; modal closes and page refreshes
+
 ## Notes
+
+- Use shadcn Dialog component
+- File and image types are Pro-only — exclude from the type selector for now
+- Follow existing patterns: server action returns `{ success, data, error }`, client form calls action
+- Zod schema lives in the server action file or a shared types file
 
 <!-- Keep this updated. Earliest to latest -->
 

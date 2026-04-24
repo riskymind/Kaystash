@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarContent } from './SidebarContent';
 import { SidebarItemType } from '@/lib/db/items';
 import { SidebarCollection } from '@/lib/db/collections';
+import { NewItemDialog } from '@/components/items/NewItemDialog';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -22,6 +23,7 @@ interface DashboardShellProps {
 export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [newItemOpen, setNewItemOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
@@ -63,10 +65,11 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
           </div>
         </div>
 
-        <Button size="sm" className="gap-1.5 h-8 text-xs">
+        <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setNewItemOpen(true)}>
           <Plus className="size-3.5" />
           New Item
         </Button>
+        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
       </header>
 
       {/* Body */}

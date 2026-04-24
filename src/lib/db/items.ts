@@ -113,6 +113,38 @@ export async function getItemsByType(userId: string, typeName: string): Promise<
   }));
 }
 
+export type CreateItemInput = {
+  title: string;
+  description?: string;
+  content?: string;
+  url?: string;
+  language?: string;
+  tags: string[];
+  itemTypeId: string;
+  contentType: 'TEXT' | 'FILE' | 'URL';
+  userId: string;
+};
+
+export async function createItemInDb(input: CreateItemInput) {
+  const { tags, userId, ...rest } = input;
+
+  return prisma.item.create({
+    data: {
+      ...rest,
+      userId,
+      tags: {
+        connectOrCreate: tags
+          .filter((t) => t.trim().length > 0)
+          .map((name) => ({
+            where: { name: name.trim().toLowerCase() },
+            create: { name: name.trim().toLowerCase() },
+          })),
+      },
+    },
+    include: { itemType: true, tags: true },
+  });
+}
+
 export async function getRecentItems(userId: string, limit = 10): Promise<ItemForDashboard[]> {
   const items = await prisma.item.findMany({
     where: { userId },

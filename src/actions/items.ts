@@ -1,0 +1,93 @@
+'use server';
+
+import { z } from 'zod';
+import { auth } from '@/auth';
+import { createItemInDb } from '@/lib/db/items';
+import { prisma } from '@/lib/prisma';
+
+const CONTENT_TYPES = {
+  snippet: 'TEXT',
+  command: 'TEXT',
+  prompt: 'TEXT',
+  note: 'TEXT',
+  link: 'URL',
+} as const;
+
+const createItemSchema = z
+  .object({
+    type: z.enum(['snippet', 'prompt', 'command', 'note', 'link']),
+    title: z.string().min(1, 'Title is required').max(200),
+    description: z.string().max(500).optional(),
+    content: z.string().optional(),
+    url: z.string().optional(),
+    language: z.string().optional(),
+    tags: z.string().optional(), // comma-separated
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === 'link') {
+      if (!data.url || data.url.trim() === '') {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'URL is required', path: ['url'] });
+      } else {
+        try {
+          new URL(data.url);
+        } catch {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Must be a valid URL', path: ['url'] });
+        }
+      }
+    }
+  });
+
+type ActionResult =
+  | { success: true }
+  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
+
+export async function createItemAction(formData: FormData): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const raw = {
+    type: formData.get('type'),
+    title: formData.get('title'),
+    description: formData.get('description') || undefined,
+    content: formData.get('content') || undefined,
+    url: formData.get('url') || undefined,
+    language: formData.get('language') || undefined,
+    tags: formData.get('tags') || undefined,
+  };
+
+  const parsed = createItemSchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string[]> = {};
+    for (const [field, errors] of Object.entries(parsed.error.flatten().fieldErrors)) {
+      fieldErrors[field] = errors ?? [];
+    }
+    return { success: false, error: 'Validation failed.', fieldErrors };
+  }
+
+  const { type, title, description, content, url, language, tags } = parsed.data;
+
+  const itemType = await prisma.itemType.findFirst({
+    where: { name: type, isSystem: true },
+    select: { id: true },
+  });
+
+  if (!itemType) return { success: false, error: 'Invalid item type.' };
+
+  const tagList = tags
+    ? tags.split(',').map((t) => t.trim()).filter(Boolean)
+    : [];
+
+  await createItemInDb({
+    title,
+    description,
+    content,
+    url,
+    language,
+    tags: tagList,
+    itemTypeId: itemType.id,
+    contentType: CONTENT_TYPES[type],
+    userId: session.user.id,
+  });
+
+  return { success: true };
+}
