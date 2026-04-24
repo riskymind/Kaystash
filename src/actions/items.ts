@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createItemInDb } from '@/lib/db/items';
+import { createItemInDb, updateItemInDb, ItemDetail } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
 
 const CONTENT_TYPES = {
@@ -90,4 +90,54 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
   });
 
   return { success: true };
+}
+
+const updateItemSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200),
+  description: z.string().max(500).nullable().optional(),
+  content: z.string().nullable().optional(),
+  url: z
+    .string()
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || (() => { try { new URL(val); return true; } catch { return false; } })(),
+      { message: 'Must be a valid URL' },
+    ),
+  language: z.string().nullable().optional(),
+  tags: z.array(z.string().trim().min(1)),
+});
+
+type UpdateActionResult =
+  | { success: true; data: ItemDetail }
+  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
+
+export async function updateItemAction(
+  itemId: string,
+  data: {
+    title: string;
+    description: string | null;
+    content: string | null;
+    url: string | null;
+    language: string | null;
+    tags: string[];
+  },
+): Promise<UpdateActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const parsed = updateItemSchema.safeParse(data);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? '_');
+      (fieldErrors[key] ??= []).push(issue.message);
+    }
+    return { success: false, error: 'Validation failed.', fieldErrors };
+  }
+
+  const updated = await updateItemInDb(itemId, session.user.id, parsed.data);
+  if (!updated) return { success: false, error: 'Item not found or access denied.' };
+
+  return { success: true, data: updated };
 }
