@@ -1,11 +1,25 @@
-# Current Feature
+# Current Feature: Item-Collection Assignment
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- User can assign an item to one or more collections when creating a new item via `NewItemDialog`
+- User can update an item's collection memberships when editing via `ItemDrawer` edit mode
+- Collection selector shows all of the user's available collections (name only)
+- Multi-select: user can pick zero, one, or many collections
+- On save, the item's `ItemCollection` join rows are created/removed accordingly
+- No work needed on collection detail pages
+
 ## Notes
+
+- Collections are fetched server-side and passed down as props (consistent with existing data-fetching patterns)
+- `createItemInDb` in `src/lib/db/items.ts` already supports `collections` connect via `ItemCollection`; check if it needs updating
+- `updateItemInDb` in `src/lib/db/items.ts` handles tags with disconnect+reconnect pattern; apply same pattern for collections
+- `NewItemDialog` is a client component — collections list must be passed as a prop from `DashboardShell` (which already receives sidebar data from the layout)
+- `ItemDrawer` fetches item detail via `GET /api/items/[id]` — the response already includes `collections`; use those to pre-populate selection
+- Use a simple multi-select UI (checkboxes in a scrollable list or a popover) — keep it consistent with the existing dark theme
 
 <!-- Keep this updated. Earliest to latest -->
 

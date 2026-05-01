@@ -180,6 +180,7 @@ export type CreateItemInput = {
   url?: string;
   language?: string;
   tags: string[];
+  collectionIds?: string[];
   itemTypeId: string;
   contentType: 'TEXT' | 'FILE' | 'URL';
   userId: string;
@@ -192,6 +193,7 @@ export type UpdateItemInput = {
   url?: string | null;
   language?: string | null;
   tags: string[];
+  collectionIds: string[];
 };
 
 export async function updateItemInDb(
@@ -199,7 +201,7 @@ export async function updateItemInDb(
   userId: string,
   input: UpdateItemInput,
 ): Promise<ItemDetail | null> {
-  const { tags, ...rest } = input;
+  const { tags, collectionIds, ...rest } = input;
 
   const existing = await prisma.item.findFirst({ where: { id: itemId, userId } });
   if (!existing) return null;
@@ -216,6 +218,10 @@ export async function updateItemInDb(
             where: { name: name.trim().toLowerCase() },
             create: { name: name.trim().toLowerCase() },
           })),
+      },
+      collections: {
+        deleteMany: {},
+        create: collectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     include: {
@@ -260,7 +266,7 @@ export async function deleteItemInDb(itemId: string, userId: string): Promise<bo
 }
 
 export async function createItemInDb(input: CreateItemInput) {
-  const { tags, userId, ...rest } = input;
+  const { tags, collectionIds, userId, ...rest } = input;
 
   return prisma.item.create({
     data: {
@@ -274,6 +280,9 @@ export async function createItemInDb(input: CreateItemInput) {
             create: { name: name.trim().toLowerCase() },
           })),
       },
+      ...(collectionIds?.length
+        ? { collections: { create: collectionIds.map((collectionId) => ({ collectionId })) } }
+        : {}),
     },
     include: { itemType: true, tags: true },
   });

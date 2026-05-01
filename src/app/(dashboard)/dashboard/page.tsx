@@ -14,7 +14,7 @@ import {
   Heart,
   Bookmark,
 } from 'lucide-react';
-import { getDashboardCollections, getDashboardStats, CollectionForDashboard } from '@/lib/db/collections';
+import { getDashboardCollections, getDashboardStats, getSelectableCollections, CollectionForDashboard } from '@/lib/db/collections';
 import { getPinnedItems, getRecentItems } from '@/lib/db/items';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
@@ -109,11 +109,12 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/sign-in');
 
-  const [collections, stats, pinnedItems, recentItems] = await Promise.all([
+  const [collections, stats, pinnedItems, recentItems, selectableCollections] = await Promise.all([
     getDashboardCollections(session.user.id),
     getDashboardStats(session.user.id),
     getPinnedItems(session.user.id),
     getRecentItems(session.user.id),
+    getSelectableCollections(session.user.id),
   ]);
 
   return (
@@ -162,14 +163,14 @@ export default async function DashboardPage() {
             <Pin className="size-3.5 text-muted-foreground" />
             <h2 className="text-sm font-semibold">Pinned</h2>
           </div>
-          <ItemRowsWithDrawer items={pinnedItems} />
+          <ItemRowsWithDrawer items={pinnedItems} collections={selectableCollections} />
         </section>
       )}
 
       {/* Recent items */}
       <section>
         <h2 className="text-sm font-semibold mb-4">Recent Items</h2>
-        <ItemRowsWithDrawer items={recentItems} />
+        <ItemRowsWithDrawer items={recentItems} collections={selectableCollections} />
       </section>
     </div>
   );

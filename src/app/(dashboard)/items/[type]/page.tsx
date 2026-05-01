@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getItemsByType, typeSlugToName } from '@/lib/db/items';
+import { getSelectableCollections } from '@/lib/db/collections';
 import { ItemCardsWithDrawer } from '@/components/items/ItemCardsWithDrawer';
 
 interface Props {
@@ -15,7 +16,10 @@ export default async function ItemsListPage({ params }: Props) {
   const typeName = typeSlugToName(type);
   if (!typeName) notFound();
 
-  const items = await getItemsByType(session.user.id, typeName);
+  const [items, selectableCollections] = await Promise.all([
+    getItemsByType(session.user.id, typeName),
+    getSelectableCollections(session.user.id),
+  ]);
 
   const label = typeName.charAt(0).toUpperCase() + typeName.slice(1) + 's';
 
@@ -33,7 +37,7 @@ export default async function ItemsListPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {label.toLowerCase()} yet.</p>
         </div>
       ) : (
-        <ItemCardsWithDrawer items={items} />
+        <ItemCardsWithDrawer items={items} collections={selectableCollections} />
       )}
     </div>
   );
