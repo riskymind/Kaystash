@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createItemAction } from '@/actions/items';
+import { CodeEditor } from './CodeEditor';
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
@@ -38,24 +39,39 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   const [selectedType, setSelectedType] = useState<ItemTypeName>('snippet');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [isPending, startTransition] = useTransition();
+  const [codeContent, setCodeContent] = useState('');
+  const [language, setLanguage] = useState('');
 
   const showContent = selectedType !== 'link';
   const showLanguage = selectedType === 'snippet' || selectedType === 'command';
   const showUrl = selectedType === 'link';
+  const useCodeEditor = selectedType === 'snippet' || selectedType === 'command';
 
   function handleOpenChange(next: boolean) {
     if (!next) {
       formRef.current?.reset();
       setSelectedType('snippet');
       setFieldErrors({});
+      setCodeContent('');
+      setLanguage('');
     }
     onOpenChange(next);
+  }
+
+  function handleTypeChange(name: ItemTypeName) {
+    setSelectedType(name);
+    setCodeContent('');
+    setFieldErrors({});
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set('type', selectedType);
+    if (useCodeEditor) {
+      formData.set('content', codeContent);
+      formData.set('language', language);
+    }
 
     startTransition(async () => {
       const result = await createItemAction(formData);
@@ -85,7 +101,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
             <button
               key={name}
               type="button"
-              onClick={() => setSelectedType(name)}
+              onClick={() => handleTypeChange(name)}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
                 selectedType === name
                   ? 'border-transparent bg-muted'
@@ -134,20 +150,12 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
             </div>
           )}
 
-          {/* Content — all non-link types */}
-          {showContent && (
-            <textarea
-              name="content"
-              placeholder="Content (optional)"
-              rows={4}
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-            />
-          )}
-
-          {/* Language — snippet and command only */}
+          {/* Language — snippet and command only (above editor so language is set before render) */}
           {showLanguage && (
             <select
               name="language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
               className="h-8 w-full rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="">Language (optional)</option>
@@ -157,6 +165,24 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 </option>
               ))}
             </select>
+          )}
+
+          {/* Content — all non-link types */}
+          {showContent && (
+            useCodeEditor ? (
+              <CodeEditor
+                value={codeContent}
+                language={language || undefined}
+                onChange={setCodeContent}
+              />
+            ) : (
+              <textarea
+                name="content"
+                placeholder="Content (optional)"
+                rows={4}
+                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              />
+            )
           )}
 
           {/* Tags */}

@@ -1,11 +1,21 @@
-# Current Feature
+# Current Feature: Code Editor
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Monaco Editor component with dark theme for snippets and commands
+- macOS-style window dots (red/yellow/green) in editor header
+- Quick copy button and language label in editor header
+- Readonly and edit modes supported
+- Fluid height with max 400px and themed scrollbar
+- Textarea retained for notes, prompts, and other non-code types
+
 ## Notes
+
+- Only snippet and command item types use the CodeEditor; all others keep the existing Textarea
+- Component must work inside ItemDrawer (both view and edit mode)
 
 <!-- Keep this updated. Earliest to latest -->
 
