@@ -11,6 +11,16 @@ Completed
 
 ## History
 
+### 2026-05-01 — Markdown Editor
+
+- Installed `react-markdown` and `remark-gfm`
+- Created `src/components/items/MarkdownEditor.tsx` — macOS-style dark chrome matching `CodeEditor` (`bg-[#1e1e1e]` / `bg-[#2d2d2d]`); Write/Preview tabs in header; copy button; edit mode defaults to Write tab; readonly mode shows Preview only; fluid height with min 120px and max 400px via `style` on the preview container; textarea is resizable in write mode
+- Added `.markdown-preview` CSS class to `src/app/globals.css` — explicit dark-theme prose styles for h1–h6, p, ul/ol, code (inline + block), pre, blockquote, a, hr, table, and img
+- Updated `src/components/items/NewItemDialog.tsx` — added `markdownContent` state; `note`/`prompt` types render `<MarkdownEditor>` instead of `<textarea>`; content injected into `formData` on submit; reset on type change and dialog close
+- Updated `src/components/items/ItemDrawer.tsx` — view mode `<pre>` replaced with `<MarkdownEditor readOnly>` for `note`/`prompt`; edit mode `<textarea>` replaced with `<MarkdownEditor>` for `note`/`prompt`; `MARKDOWN_TYPES` constant and `useMarkdownEditor` boolean added alongside existing `CODE_TYPES`/`useCodeEditor`
+- `snippet` and `command` types keep `CodeEditor` unchanged
+- Build passes with no errors
+
 ### 2026-05-01 — Code Editor
 
 - Installed `@monaco-editor/react`
