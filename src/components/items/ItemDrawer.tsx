@@ -42,6 +42,7 @@ import {
 import { ItemDetail } from '@/lib/db/items';
 import { updateItemAction, deleteItemAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
+import { MarkdownEditor } from './MarkdownEditor';
 
 const ICON_MAP = {
   Code,
@@ -58,6 +59,7 @@ type IconName = keyof typeof ICON_MAP;
 const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note'];
 const LANGUAGE_TYPES = ['snippet', 'command'];
 const CODE_TYPES = ['snippet', 'command'];
+const MARKDOWN_TYPES = ['prompt', 'note'];
 
 function formatDate(iso: string | Date) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -224,6 +226,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const showLanguage = LANGUAGE_TYPES.includes(typeName);
   const showUrl = typeName === 'link';
   const useCodeEditor = CODE_TYPES.includes(typeName);
+  const useMarkdownEditor = MARKDOWN_TYPES.includes(typeName);
 
   const inputClass =
     'w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50';
@@ -364,6 +367,8 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     language={item.language ?? undefined}
                     readOnly
                   />
+                ) : useMarkdownEditor ? (
+                  <MarkdownEditor value={item.content} readOnly />
                 ) : (
                   <pre className="text-xs bg-muted rounded-md p-4 overflow-x-auto whitespace-pre-wrap wrap-break-word font-mono leading-relaxed">
                     {item.content}
@@ -516,16 +521,12 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     language={editState.language || undefined}
                     onChange={(v) => patch('content', v)}
                   />
-                ) : (
-                  <textarea
+                ) : useMarkdownEditor ? (
+                  <MarkdownEditor
                     value={editState.content}
-                    onChange={(e) => patch('content', e.target.value)}
-                    placeholder="Paste your content here"
-                    rows={8}
-                    className={`${inputClass} resize-y font-mono text-xs`}
-                    disabled={saving}
+                    onChange={(v) => patch('content', v)}
                   />
-                )}
+                ) : null}
               </div>
             )}
 

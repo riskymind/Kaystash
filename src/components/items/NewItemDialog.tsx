@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createItemAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
+import { MarkdownEditor } from './MarkdownEditor';
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
@@ -40,12 +41,14 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [isPending, startTransition] = useTransition();
   const [codeContent, setCodeContent] = useState('');
+  const [markdownContent, setMarkdownContent] = useState('');
   const [language, setLanguage] = useState('');
 
   const showContent = selectedType !== 'link';
   const showLanguage = selectedType === 'snippet' || selectedType === 'command';
   const showUrl = selectedType === 'link';
   const useCodeEditor = selectedType === 'snippet' || selectedType === 'command';
+  const useMarkdownEditor = selectedType === 'note' || selectedType === 'prompt';
 
   function handleOpenChange(next: boolean) {
     if (!next) {
@@ -53,6 +56,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
       setSelectedType('snippet');
       setFieldErrors({});
       setCodeContent('');
+      setMarkdownContent('');
       setLanguage('');
     }
     onOpenChange(next);
@@ -61,6 +65,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   function handleTypeChange(name: ItemTypeName) {
     setSelectedType(name);
     setCodeContent('');
+    setMarkdownContent('');
     setFieldErrors({});
   }
 
@@ -71,6 +76,9 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
     if (useCodeEditor) {
       formData.set('content', codeContent);
       formData.set('language', language);
+    }
+    if (useMarkdownEditor) {
+      formData.set('content', markdownContent);
     }
 
     startTransition(async () => {
@@ -175,14 +183,13 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 language={language || undefined}
                 onChange={setCodeContent}
               />
-            ) : (
-              <textarea
-                name="content"
-                placeholder="Content (optional)"
-                rows={4}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+            ) : useMarkdownEditor ? (
+              <MarkdownEditor
+                value={markdownContent}
+                onChange={setMarkdownContent}
+                placeholder="Write markdown here…"
               />
-            )
+            ) : null
           )}
 
           {/* Tags */}
