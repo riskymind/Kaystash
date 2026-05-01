@@ -1,25 +1,23 @@
-# Current Feature: Code Editor
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Monaco Editor component with dark theme for snippets and commands
-- macOS-style window dots (red/yellow/green) in editor header
-- Quick copy button and language label in editor header
-- Readonly and edit modes supported
-- Fluid height with max 400px and themed scrollbar
-- Textarea retained for notes, prompts, and other non-code types
-
 ## Notes
-
-- Only snippet and command item types use the CodeEditor; all others keep the existing Textarea
-- Component must work inside ItemDrawer (both view and edit mode)
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-01 — Code Editor
+
+- Installed `@monaco-editor/react`
+- Created `src/components/items/CodeEditor.tsx` — Monaco Editor (VS Dark theme) wrapped in macOS-style chrome; header has red/yellow/green dots, language label, and copy button; fluid height auto-sized to content (min 120px, max 400px) driven via React state to avoid feedback loop; thin 6px themed scrollbars; supports `readOnly` and editable modes
+- Updated `src/components/items/ItemDrawer.tsx` — view mode `<pre>` and edit mode `<textarea>` replaced with `<CodeEditor>` for `snippet` and `command` types; all other types keep existing markup
+- Updated `src/components/items/NewItemDialog.tsx` — language `<select>` is now controlled (bound to state) and placed above the editor; `snippet`/`command` types render `<CodeEditor>` with content injected into `formData` on submit; `prompt`/`note` keep the plain `<textarea>`
+- Build passes with no errors
 
 ### 2026-04-13 — Initial Next.js Setup
 - Bootstrapped project with `create-next-app` (Next.js 16, React 19, TypeScript, Tailwind CSS v4)
