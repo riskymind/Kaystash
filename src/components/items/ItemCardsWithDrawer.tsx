@@ -7,9 +7,10 @@ import { ItemDrawer } from './ItemDrawer';
 
 interface ItemCardsWithDrawerProps {
   items: ItemForDashboard[];
+  collections: Array<{ id: string; name: string }>;
 }
 
-export function ItemCardsWithDrawer({ items }: ItemCardsWithDrawerProps) {
+export function ItemCardsWithDrawer({ items, collections }: ItemCardsWithDrawerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -19,7 +20,7 @@ export function ItemCardsWithDrawer({ items }: ItemCardsWithDrawerProps) {
           <ItemCard key={item.id} item={item} onClick={setSelectedId} />
         ))}
       </div>
-      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} />
+      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} collections={collections} />
     </>
   );
 }

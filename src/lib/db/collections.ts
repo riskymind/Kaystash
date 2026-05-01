@@ -125,6 +125,16 @@ export async function getSidebarCollections(userId: string): Promise<SidebarColl
   });
 }
 
+export type SelectableCollection = { id: string; name: string };
+
+export async function getSelectableCollections(userId: string): Promise<SelectableCollection[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  });
+}
+
 export type CreateCollectionInput = {
   name: string;
   description?: string;

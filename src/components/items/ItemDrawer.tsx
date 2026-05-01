@@ -122,14 +122,16 @@ function itemToEditState(item: ItemDetail): EditState {
 interface ItemDrawerProps {
   itemId: string | null;
   onClose: () => void;
+  collections: Array<{ id: string; name: string }>;
 }
 
-export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
   const router = useRouter();
   const [item, setItem] = useState<ItemDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState<EditState | null>(null);
+  const [editCollectionIds, setEditCollectionIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -156,6 +158,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   function startEditing() {
     if (!item) return;
     setEditState(itemToEditState(item));
+    setEditCollectionIds(item.collections.map((c) => c.id));
     setFieldErrors({});
     setIsEditing(true);
   }
@@ -163,6 +166,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   function cancelEditing() {
     if (!item) return;
     setEditState(itemToEditState(item));
+    setEditCollectionIds(item.collections.map((c) => c.id));
     setFieldErrors({});
     setIsEditing(false);
   }
@@ -185,6 +189,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
       url: editState.url || null,
       language: editState.language || null,
       tags,
+      collectionIds: editCollectionIds,
     });
 
     setSaving(false);
@@ -577,19 +582,31 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
               <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
             </div>
 
-            {/* Non-editable: Collections */}
-            {item.collections.length > 0 && (
+            {/* Collections picker */}
+            {collections.length > 0 && (
               <div>
                 <label className={labelClass}>Collections</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {item.collections.map((col) => (
-                    <span
+                <div className="max-h-28 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1.5">
+                  {collections.map((col) => (
+                    <label
                       key={col.id}
-                      className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-muted text-muted-foreground"
+                      className="flex items-center gap-2 cursor-pointer select-none"
                     >
-                      <FolderOpen className="size-3" />
-                      {col.name}
-                    </span>
+                      <input
+                        type="checkbox"
+                        className="accent-primary"
+                        checked={editCollectionIds.includes(col.id)}
+                        onChange={(e) =>
+                          setEditCollectionIds((prev) =>
+                            e.target.checked
+                              ? [...prev, col.id]
+                              : prev.filter((id) => id !== col.id),
+                          )
+                        }
+                        disabled={saving}
+                      />
+                      <span className="text-sm">{col.name}</span>
+                    </label>
                   ))}
                 </div>
               </div>

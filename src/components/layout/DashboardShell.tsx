@@ -77,7 +77,7 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
             New Item
           </Button>
         </div>
-        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
+        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} collections={sidebarCollections} />
         <NewCollectionDialog open={newCollectionOpen} onOpenChange={setNewCollectionOpen} />
       </header>
 

@@ -32,9 +32,10 @@ const LANGUAGES = ['TypeScript', 'JavaScript', 'Python', 'Go', 'Rust', 'Shell', 
 interface NewItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  collections: Array<{ id: string; name: string }>;
 }
 
-export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
+export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialogProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedType, setSelectedType] = useState<ItemTypeName>('snippet');
@@ -43,6 +44,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   const [codeContent, setCodeContent] = useState('');
   const [markdownContent, setMarkdownContent] = useState('');
   const [language, setLanguage] = useState('');
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
 
   const showContent = selectedType !== 'link';
   const showLanguage = selectedType === 'snippet' || selectedType === 'command';
@@ -58,6 +60,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
       setCodeContent('');
       setMarkdownContent('');
       setLanguage('');
+      setSelectedCollectionIds([]);
     }
     onOpenChange(next);
   }
@@ -80,6 +83,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
     if (useMarkdownEditor) {
       formData.set('content', markdownContent);
     }
+    formData.set('collectionIds', JSON.stringify(selectedCollectionIds));
 
     startTransition(async () => {
       const result = await createItemAction(formData);
@@ -198,6 +202,35 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
             placeholder="Tags (comma-separated)"
             className="h-8 text-sm"
           />
+
+          {/* Collections */}
+          {collections.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Collections</span>
+              <div className="max-h-28 overflow-y-auto rounded-md border border-input bg-background p-2 space-y-1.5">
+                {collections.map((col) => (
+                  <label
+                    key={col.id}
+                    className="flex items-center gap-2 cursor-pointer select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-primary"
+                      checked={selectedCollectionIds.includes(col.id)}
+                      onChange={(e) =>
+                        setSelectedCollectionIds((prev) =>
+                          e.target.checked
+                            ? [...prev, col.id]
+                            : prev.filter((id) => id !== col.id),
+                        )
+                      }
+                    />
+                    <span className="text-sm">{col.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <DialogFooter showCloseButton>
             <Button type="submit" size="sm" disabled={isPending}>

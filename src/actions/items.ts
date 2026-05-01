@@ -45,6 +45,11 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
 
+  const rawCollectionIds = formData.get('collectionIds');
+  const collectionIds: string[] = rawCollectionIds
+    ? (JSON.parse(rawCollectionIds as string) as string[])
+    : [];
+
   const raw = {
     type: formData.get('type'),
     title: formData.get('title'),
@@ -84,6 +89,7 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
     url,
     language,
     tags: tagList,
+    collectionIds,
     itemTypeId: itemType.id,
     contentType: CONTENT_TYPES[type],
     userId: session.user.id,
@@ -121,12 +127,15 @@ export async function updateItemAction(
     url: string | null;
     language: string | null;
     tags: string[];
+    collectionIds: string[];
   },
 ): Promise<UpdateActionResult> {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
 
-  const parsed = updateItemSchema.safeParse(data);
+  const { collectionIds, ...rest } = data;
+
+  const parsed = updateItemSchema.safeParse(rest);
   if (!parsed.success) {
     const fieldErrors: Record<string, string[]> = {};
     for (const issue of parsed.error.issues) {
@@ -136,7 +145,7 @@ export async function updateItemAction(
     return { success: false, error: 'Validation failed.', fieldErrors };
   }
 
-  const updated = await updateItemInDb(itemId, session.user.id, parsed.data);
+  const updated = await updateItemInDb(itemId, session.user.id, { ...parsed.data, collectionIds });
   if (!updated) return { success: false, error: 'Item not found or access denied.' };
 
   return { success: true, data: updated };
