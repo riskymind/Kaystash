@@ -1,11 +1,25 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Add a "New Collection" button in the top bar (alongside or near "New Item")
+- Button opens a modal with fields: name (required) and description (optional)
+- On submit, create the collection scoped to the authenticated user
+- Show a success or failure toast after submission
+- Refresh/update the UI so the new collection appears immediately (sidebar + any collections page)
+- Follow the same patterns as item create: server action, Zod validation, `lib/db` function, toast + `router.refresh()`
+
 ## Notes
+
+- Collections are user-scoped (`userId` on every collection)
+- Data access: server components fetch via `lib/db/collections.ts` functions; client-side calls use server actions (not API routes, matching item create pattern)
+- Modal fields: `name` (required, string), `description` (optional, string)
+- No `defaultTypeId` needed at creation time — leave it null
+- Reuse existing patterns: `createItemAction` style server action, Zod schema, `{ success, data, error }` return shape
+- The sidebar already renders `sidebarCollections` from the layout — `router.refresh()` will re-fetch and update it
 
 <!-- Keep this updated. Earliest to latest -->
 
