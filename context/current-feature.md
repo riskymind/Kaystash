@@ -1,27 +1,25 @@
-# Current Feature: Collections Pages & Navigation
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Create `/collections` page listing all user collections using existing collection cards
-- Create `/collections/[id]` page showing the items inside a specific collection using existing item cards/rows
-- Update sidebar "View all collections" link to point to `/collections`
-- Link all collection cards on the dashboard to their specific `/collections/[id]` page
-
 ## Notes
-
-- Use `getDashboardCollections` or a similar DB function for the `/collections` page — may need a new `getAllCollections` function that returns all collections (not just dashboard subset)
-- `/collections/[id]` needs a DB function to fetch the collection by ID with its items (full item detail: type, tags, etc.)
-- Reuse `ItemCardsWithDrawer` or `ItemRowsWithDrawer` for the items display inside a collection page
-- Collection cards on the dashboard currently don't have click/link behavior — add `href` or `onClick` wrapping
-- Auth guard via `auth()` on both new server pages
-- Return 404 for unknown collection IDs or collections that don't belong to the user
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-04 — Collections Pages & Navigation
+
+- Added `CollectionDetail` type and `getCollectionDetail` function to `src/lib/db/collections.ts` — fetches a single collection by ID with ownership check, computes dominant color, returns metadata
+- Added `getItemsInCollection` function to `src/lib/db/collections.ts` — fetches items in a collection (filtered to current user) ordered by `addedAt` desc, returns `ItemForDashboard`-shaped objects
+- Created `src/app/(dashboard)/collections/page.tsx` — server component; lists all user collections as `Link`-wrapped cards pointing to `/collections/[id]`; shows item count, description, dominant-color left border, type icon chips, and favorite star; empty state when no collections
+- Created `src/app/(dashboard)/collections/[id]/page.tsx` — server component; fetches collection detail + items in `Promise.all`; returns 404 for unknown/unauthorized IDs; renders collection name, description, item count, favorite star; uses `ItemCardsWithDrawer` for items with full drawer support
+- Updated `src/app/(dashboard)/dashboard/page.tsx` — `CollectionCard` now renders as `<Link href="/collections/[id]">` instead of a plain `<div>`; "View all" button replaced with `<Link href="/collections">`; added `next/link` import
+- Sidebar "View all collections" and per-collection links were already correctly pointing to `/collections` and `/collections/[id]` — no change needed
+- Build passes with no errors
 
 ### 2026-05-01 — Item-Collection Assignment
 
