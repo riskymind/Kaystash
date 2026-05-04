@@ -1,11 +1,25 @@
-# Current Feature
+# Current Feature: Collection Management Actions
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Add Edit, Delete, and Favorite buttons on `/collections/[id]` detail page
+  - Favorite button: render the icon/button only (no functionality yet)
+  - Edit button: opens a modal to edit collection name and description
+  - Delete button: shows a confirmation dialog; on confirm, deletes the collection (items remain, only their membership in the collection is removed)
+- On collection cards at `/collections` (list page) and `/dashboard`, add a 3-dots menu icon that shows a dropdown with Edit, Delete, and Favorite options
+  - Clicking anywhere on the card (outside the 3-dots menu) navigates to the collection detail page
+  - Edit and Delete behave the same as on the detail page
+  - Favorite: render only (no functionality yet)
+
 ## Notes
+
+- Items must NOT be deleted when a collection is deleted — only the `ItemCollection` join rows and the `Collection` row itself should be removed
+- Reuse the same edit modal and delete confirmation across the detail page and card dropdown for consistency
+- The 3-dots icon on cards must not trigger the card's navigation link (stop propagation)
+- Follow existing patterns: ShadCN `Dialog` for edit modal, ShadCN `AlertDialog` for delete confirmation, `router.refresh()` + toast on success
 
 <!-- Keep this updated. Earliest to latest -->
 

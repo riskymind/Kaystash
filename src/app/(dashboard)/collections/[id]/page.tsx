@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { getCollectionDetail, getItemsInCollection } from '@/lib/db/collections';
 import { getSelectableCollections } from '@/lib/db/collections';
 import { ItemCardsWithDrawer } from '@/components/items/ItemCardsWithDrawer';
+import { CollectionDetailActions } from '@/components/collections/CollectionDetailActions';
 import { Star } from 'lucide-react';
 
 interface Props {
@@ -26,18 +27,29 @@ export default async function CollectionDetailPage({ params }: Props) {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">{collection.name}</h1>
-          {collection.isFavorite && (
-            <Star className="size-4 fill-yellow-400 text-yellow-400 shrink-0" />
-          )}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold">{collection.name}</h1>
+              {collection.isFavorite && (
+                <Star className="size-4 fill-yellow-400 text-yellow-400 shrink-0" />
+              )}
+            </div>
+            {collection.description && (
+              <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
+            )}
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
+            </p>
+          </div>
+          <CollectionDetailActions
+            collection={{
+              id: collection.id,
+              name: collection.name,
+              description: collection.description,
+            }}
+          />
         </div>
-        {collection.description && (
-          <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
-        )}
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
-        </p>
       </div>
 
       {items.length === 0 ? (

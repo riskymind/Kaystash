@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createCollectionInDb } from '@/lib/db/collections';
+import { createCollectionInDb, updateCollectionInDb, deleteCollectionInDb } from '@/lib/db/collections';
 
 const createCollectionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -36,6 +36,58 @@ export async function createCollectionAction(formData: FormData): Promise<Create
     description: parsed.data.description,
     userId: session.user.id,
   });
+
+  return { success: true };
+}
+
+const updateCollectionSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+  description: z.string().max(500).optional(),
+});
+
+type UpdateCollectionResult =
+  | { success: true }
+  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
+
+export async function updateCollectionAction(
+  collectionId: string,
+  formData: FormData,
+): Promise<UpdateCollectionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const raw = {
+    name: formData.get('name'),
+    description: formData.get('description') || undefined,
+  };
+
+  const parsed = updateCollectionSchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string[]> = {};
+    for (const [field, errors] of Object.entries(parsed.error.flatten().fieldErrors)) {
+      fieldErrors[field] = errors ?? [];
+    }
+    return { success: false, error: 'Validation failed.', fieldErrors };
+  }
+
+  await updateCollectionInDb({
+    id: collectionId,
+    name: parsed.data.name,
+    description: parsed.data.description,
+    userId: session.user.id,
+  });
+
+  return { success: true };
+}
+
+type DeleteCollectionResult = { success: true } | { success: false; error: string };
+
+export async function deleteCollectionAction(collectionId: string): Promise<DeleteCollectionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const result = await deleteCollectionInDb(collectionId, session.user.id);
+  if (!result) return { success: false, error: 'Collection not found.' };
 
   return { success: true };
 }
