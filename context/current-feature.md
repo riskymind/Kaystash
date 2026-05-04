@@ -1,29 +1,28 @@
-# Current Feature: Collection Management Actions
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Add Edit, Delete, and Favorite buttons on `/collections/[id]` detail page
-  - Favorite button: render the icon/button only (no functionality yet)
-  - Edit button: opens a modal to edit collection name and description
-  - Delete button: shows a confirmation dialog; on confirm, deletes the collection (items remain, only their membership in the collection is removed)
-- On collection cards at `/collections` (list page) and `/dashboard`, add a 3-dots menu icon that shows a dropdown with Edit, Delete, and Favorite options
-  - Clicking anywhere on the card (outside the 3-dots menu) navigates to the collection detail page
-  - Edit and Delete behave the same as on the detail page
-  - Favorite: render only (no functionality yet)
-
 ## Notes
-
-- Items must NOT be deleted when a collection is deleted — only the `ItemCollection` join rows and the `Collection` row itself should be removed
-- Reuse the same edit modal and delete confirmation across the detail page and card dropdown for consistency
-- The 3-dots icon on cards must not trigger the card's navigation link (stop propagation)
-- Follow existing patterns: ShadCN `Dialog` for edit modal, ShadCN `AlertDialog` for delete confirmation, `router.refresh()` + toast on success
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-04 — Collection Management Actions
+
+- Added `UpdateCollectionInput` type, `updateCollectionInDb`, and `deleteCollectionInDb` to `src/lib/db/collections.ts` — update uses `updateMany` with ownership check; delete uses `findFirst` + `delete` (cascade removes `ItemCollection` rows, items untouched)
+- Added `updateCollectionAction` and `deleteCollectionAction` to `src/actions/collections.ts` — same Zod + auth pattern as create; delete checks ownership and returns `{ success, error }`
+- Created `src/components/collections/EditCollectionDialog.tsx` — Dialog pre-populated with existing name/description; inline field errors; toast + `router.refresh()` on success
+- Created `src/components/collections/DeleteCollectionDialog.tsx` — `AlertDialog` confirmation; accepts optional `onSuccess` callback for custom post-delete navigation; falls back to `router.refresh()`
+- Created `src/components/collections/CollectionCardWithMenu.tsx` — client component; card body is a `<Link>` (block, `pr-10`); 3-dots `DropdownMenu` is an absolute-positioned sibling outside the Link so clicks don't navigate; Edit / Favorite (disabled) / Delete items in the menu
+- Created `src/components/collections/CollectionDetailActions.tsx` — client component; renders Edit, Favorite (disabled/icon-only), Delete buttons in the detail page header; Delete redirects to `/collections` on success
+- Updated `src/app/(dashboard)/collections/[id]/page.tsx` — added `CollectionDetailActions` to the header row alongside the collection name/meta
+- Updated `src/app/(dashboard)/collections/page.tsx` — replaced inline `CollectionCard` with `CollectionCardWithMenu`; removed now-unused `ICON_MAP` and icon imports
+- Updated `src/app/(dashboard)/dashboard/page.tsx` — replaced inline `CollectionCard` with `CollectionCardWithMenu`; removed unused `ICON_MAP`, `CollectionCard`, and related icon imports
+- Build passes with no errors
 
 ### 2026-05-04 — Collections Pages & Navigation
 
