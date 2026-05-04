@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {
   Code,
   Sparkles,
@@ -58,8 +59,9 @@ function StatCard({
 
 function CollectionCard({ col }: { col: CollectionForDashboard }) {
   return (
-    <div
-      className="rounded-lg border border-border bg-card p-4 hover:bg-muted/20 transition-colors relative overflow-hidden"
+    <Link
+      href={`/collections/${col.id}`}
+      className="block rounded-lg border border-border bg-card p-4 hover:bg-muted/20 transition-colors overflow-hidden"
       style={{ borderLeftColor: col.dominantColor, borderLeftWidth: '3px' }}
     >
       {/* Header */}
@@ -99,7 +101,7 @@ function CollectionCard({ col }: { col: CollectionForDashboard }) {
           })}
         </div>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -140,9 +142,9 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold">Collections</h2>
           <div className="flex items-center gap-3">
-            <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/collections" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               View all
-            </button>
+            </Link>
             <button className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
               <FolderPlus className="size-3.5" />
               New Collection

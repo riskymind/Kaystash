@@ -151,6 +151,97 @@ export async function createCollectionInDb(input: CreateCollectionInput) {
   });
 }
 
+export type CollectionDetail = {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  updatedAt: Date;
+  itemCount: number;
+  dominantColor: string;
+};
+
+export async function getCollectionDetail(
+  collectionId: string,
+  userId: string,
+): Promise<CollectionDetail | null> {
+  const col = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    include: {
+      items: {
+        include: {
+          item: { include: { itemType: true } },
+        },
+      },
+    },
+  });
+
+  if (!col) return null;
+
+  const typeCounts = new Map<string, { count: number; color: string }>();
+  for (const ic of col.items) {
+    const t = ic.item.itemType;
+    const existing = typeCounts.get(t.id);
+    if (existing) {
+      existing.count++;
+    } else {
+      typeCounts.set(t.id, { count: 1, color: t.color });
+    }
+  }
+
+  let dominantColor = '#6b7280';
+  let maxCount = 0;
+  for (const { count, color } of typeCounts.values()) {
+    if (count > maxCount) {
+      maxCount = count;
+      dominantColor = color;
+    }
+  }
+
+  return {
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    isFavorite: col.isFavorite,
+    updatedAt: col.updatedAt,
+    itemCount: col.items.length,
+    dominantColor,
+  };
+}
+
+export async function getItemsInCollection(
+  collectionId: string,
+  userId: string,
+) {
+  const itemCollections = await prisma.itemCollection.findMany({
+    where: {
+      collectionId,
+      item: { userId },
+    },
+    orderBy: { addedAt: 'desc' },
+    include: {
+      item: {
+        include: { itemType: true, tags: true },
+      },
+    },
+  });
+
+  return itemCollections.map((ic) => ({
+    id: ic.item.id,
+    title: ic.item.title,
+    description: ic.item.description,
+    isFavorite: ic.item.isFavorite,
+    isPinned: ic.item.isPinned,
+    createdAt: ic.item.createdAt,
+    tags: ic.item.tags.map((t) => t.name),
+    itemType: {
+      name: ic.item.itemType.name,
+      icon: ic.item.itemType.icon,
+      color: ic.item.itemType.color,
+    },
+  }));
+}
+
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

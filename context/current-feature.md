@@ -1,11 +1,23 @@
-# Current Feature
+# Current Feature: Collections Pages & Navigation
 
 ## Status
-Completed
+In Progress
 
 ## Goals
 
+- Create `/collections` page listing all user collections using existing collection cards
+- Create `/collections/[id]` page showing the items inside a specific collection using existing item cards/rows
+- Update sidebar "View all collections" link to point to `/collections`
+- Link all collection cards on the dashboard to their specific `/collections/[id]` page
+
 ## Notes
+
+- Use `getDashboardCollections` or a similar DB function for the `/collections` page — may need a new `getAllCollections` function that returns all collections (not just dashboard subset)
+- `/collections/[id]` needs a DB function to fetch the collection by ID with its items (full item detail: type, tags, etc.)
+- Reuse `ItemCardsWithDrawer` or `ItemRowsWithDrawer` for the items display inside a collection page
+- Collection cards on the dashboard currently don't have click/link behavior — add `href` or `onClick` wrapping
+- Auth guard via `auth()` on both new server pages
+- Return 404 for unknown collection IDs or collections that don't belong to the user
 
 <!-- Keep this updated. Earliest to latest -->
 
