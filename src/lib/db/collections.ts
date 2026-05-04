@@ -242,6 +242,31 @@ export async function getItemsInCollection(
   }));
 }
 
+export type UpdateCollectionInput = {
+  id: string;
+  name: string;
+  description?: string;
+  userId: string;
+};
+
+export async function updateCollectionInDb(input: UpdateCollectionInput) {
+  return prisma.collection.updateMany({
+    where: { id: input.id, userId: input.userId },
+    data: {
+      name: input.name,
+      description: input.description ?? null,
+    },
+  });
+}
+
+export async function deleteCollectionInDb(collectionId: string, userId: string) {
+  const col = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+  });
+  if (!col) return null;
+  return prisma.collection.delete({ where: { id: collectionId } });
+}
+
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),
