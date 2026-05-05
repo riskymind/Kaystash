@@ -1,25 +1,22 @@
-# Current Feature: Settings Page
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Create a `/settings` page inside the `(dashboard)` layout so it inherits auth protection
-- Add a "Settings" link to the user avatar dropdown at the bottom of the sidebar, pointing to `/settings`
-- Move the Change Password form and the Delete Account section from the profile page to the settings page
-- Profile page retains account info and usage stats (read-only sections only)
-
 ## Notes
-
-- Settings route: `src/app/(dashboard)/settings/page.tsx` — server component, same pattern as profile page
-- Re-use the existing `ChangePasswordForm` and `DeleteAccountDialog` components from `src/components/profile/` — no need to recreate them
-- The user avatar dropdown is rendered in `SidebarContent` — add a Settings item alongside the existing "Profile" and "Sign out" items
-- "Forgot password" in the request refers to the Change Password section (credential users only), not the public `/forgot-password` page
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-05 — Settings Page
+
+- Created `src/app/(dashboard)/settings/page.tsx` — server component inside `(dashboard)` layout; auth-protected via `auth()`; fetches `getProfileUser` for `hasPassword` flag; renders Change Password section (credential users only) and Danger Zone with Delete Account
+- Updated `src/app/(dashboard)/profile/page.tsx` — removed Change Password and Delete Account sections; removed `ChangePasswordForm` and `DeleteAccountDialog` imports; profile now shows account info and usage stats only (read-only)
+- Updated `src/components/shared/UserAvatar.tsx` — added "Settings" `DropdownMenuItem` (with `Settings` icon) between Profile and Sign out, navigating to `/settings`
+- Build passes with no errors
 
 ### 2026-05-05 — Pagination
 
