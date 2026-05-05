@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ITEMS_PER_PAGE } from '@/lib/constants/pagination';
 
 export type SidebarCollection = {
   id: string;
@@ -209,37 +210,59 @@ export async function getCollectionDetail(
   };
 }
 
+export type PaginatedCollectionItems = {
+  items: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    isFavorite: boolean;
+    isPinned: boolean;
+    createdAt: Date;
+    tags: string[];
+    itemType: { name: string; icon: string; color: string };
+  }>;
+  totalCount: number;
+};
+
 export async function getItemsInCollection(
   collectionId: string,
   userId: string,
-) {
-  const itemCollections = await prisma.itemCollection.findMany({
-    where: {
-      collectionId,
-      item: { userId },
-    },
-    orderBy: { addedAt: 'desc' },
-    include: {
-      item: {
-        include: { itemType: true, tags: true },
-      },
-    },
-  });
+  page = 1,
+  pageSize = ITEMS_PER_PAGE,
+): Promise<PaginatedCollectionItems> {
+  const where = { collectionId, item: { userId } };
+  const skip = (page - 1) * pageSize;
 
-  return itemCollections.map((ic) => ({
-    id: ic.item.id,
-    title: ic.item.title,
-    description: ic.item.description,
-    isFavorite: ic.item.isFavorite,
-    isPinned: ic.item.isPinned,
-    createdAt: ic.item.createdAt,
-    tags: ic.item.tags.map((t) => t.name),
-    itemType: {
-      name: ic.item.itemType.name,
-      icon: ic.item.itemType.icon,
-      color: ic.item.itemType.color,
-    },
-  }));
+  const [itemCollections, totalCount] = await Promise.all([
+    prisma.itemCollection.findMany({
+      where,
+      orderBy: { addedAt: 'desc' },
+      skip,
+      take: pageSize,
+      include: {
+        item: { include: { itemType: true, tags: true } },
+      },
+    }),
+    prisma.itemCollection.count({ where }),
+  ]);
+
+  return {
+    items: itemCollections.map((ic) => ({
+      id: ic.item.id,
+      title: ic.item.title,
+      description: ic.item.description,
+      isFavorite: ic.item.isFavorite,
+      isPinned: ic.item.isPinned,
+      createdAt: ic.item.createdAt,
+      tags: ic.item.tags.map((t) => t.name),
+      itemType: {
+        name: ic.item.itemType.name,
+        icon: ic.item.itemType.icon,
+        color: ic.item.itemType.color,
+      },
+    })),
+    totalCount,
+  };
 }
 
 export type UpdateCollectionInput = {

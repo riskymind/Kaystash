@@ -3,12 +3,15 @@ import { auth } from '@/auth';
 import { getItemsByType, typeSlugToName } from '@/lib/db/items';
 import { getSelectableCollections } from '@/lib/db/collections';
 import { ItemCardsWithDrawer } from '@/components/items/ItemCardsWithDrawer';
+import { Pagination } from '@/components/shared/Pagination';
+import { ITEMS_PER_PAGE } from '@/lib/constants/pagination';
 
 interface Props {
   params: Promise<{ type: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function ItemsListPage({ params }: Props) {
+export default async function ItemsListPage({ params, searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.id) redirect('/sign-in');
 
@@ -16,11 +19,15 @@ export default async function ItemsListPage({ params }: Props) {
   const typeName = typeSlugToName(type);
   if (!typeName) notFound();
 
-  const [items, selectableCollections] = await Promise.all([
-    getItemsByType(session.user.id, typeName),
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? '1', 10) || 1);
+
+  const [{ items, totalCount }, selectableCollections] = await Promise.all([
+    getItemsByType(session.user.id, typeName, currentPage, ITEMS_PER_PAGE),
     getSelectableCollections(session.user.id),
   ]);
 
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const label = typeName.charAt(0).toUpperCase() + typeName.slice(1) + 's';
 
   return (
@@ -28,7 +35,7 @@ export default async function ItemsListPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-semibold">{label}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {items.length} {items.length === 1 ? 'item' : 'items'}
+          {totalCount} {totalCount === 1 ? 'item' : 'items'}
         </p>
       </div>
 
@@ -37,7 +44,14 @@ export default async function ItemsListPage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {label.toLowerCase()} yet.</p>
         </div>
       ) : (
-        <ItemCardsWithDrawer items={items} collections={selectableCollections} />
+        <>
+          <ItemCardsWithDrawer items={items} collections={selectableCollections} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            basePath={`/items/${type}`}
+          />
+        </>
       )}
     </div>
   );

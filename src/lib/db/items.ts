@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ITEMS_PER_PAGE } from '@/lib/constants/pagination';
 
 // Slug → DB name map (URL uses plural, DB stores singular)
 const TYPE_SLUG_MAP: Record<string, string> = {
@@ -84,33 +85,48 @@ export async function getPinnedItems(userId: string): Promise<ItemForDashboard[]
   }));
 }
 
-export async function getItemsByType(userId: string, typeName: string): Promise<ItemForDashboard[]> {
-  const items = await prisma.item.findMany({
-    where: {
-      userId,
-      itemType: { name: typeName },
-    },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      itemType: true,
-      tags: true,
-    },
-  });
+export type PaginatedItems = {
+  items: ItemForDashboard[];
+  totalCount: number;
+};
 
-  return items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    description: item.description,
-    isFavorite: item.isFavorite,
-    isPinned: item.isPinned,
-    createdAt: item.createdAt,
-    tags: item.tags.map((t) => t.name),
-    itemType: {
-      name: item.itemType.name,
-      icon: item.itemType.icon,
-      color: item.itemType.color,
-    },
-  }));
+export async function getItemsByType(
+  userId: string,
+  typeName: string,
+  page = 1,
+  pageSize = ITEMS_PER_PAGE,
+): Promise<PaginatedItems> {
+  const skip = (page - 1) * pageSize;
+  const where = { userId, itemType: { name: typeName } };
+
+  const [items, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: pageSize,
+      include: { itemType: true, tags: true },
+    }),
+    prisma.item.count({ where }),
+  ]);
+
+  return {
+    items: items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      isFavorite: item.isFavorite,
+      isPinned: item.isPinned,
+      createdAt: item.createdAt,
+      tags: item.tags.map((t) => t.name),
+      itemType: {
+        name: item.itemType.name,
+        icon: item.itemType.icon,
+        color: item.itemType.color,
+      },
+    })),
+    totalCount,
+  };
 }
 
 export type ItemDetail = {
