@@ -1,30 +1,25 @@
-# Current Feature: Global Search / Command Palette
+# Current Feature
 
 ## Status
-In Progress
+Completed
 
 ## Goals
 
-- Open command palette with Cmd+K (Mac) / Ctrl+K (Windows)
-- Fuzzy search across all items and collections
-- Display grouped results: Items section and Collections section
-- Support keyboard navigation (arrow keys, Enter to select)
-- Show item type icon for items and item count for collections
-- Navigate to item drawer on item select; navigate to collection page on collection select
-- TopBar search input opens palette on click
-- Show ⌘K hint in search input placeholder
-
 ## Notes
-
-- Use shadcn `cmdk` component (Command)
-- Client-side fuzzy search — no server round-trips
-- Pre-fetch searchable data on app load
-- Search data shape: items (id, title, type, content preview), collections (id, name, itemCount)
-- Reuse existing data fetching functions from `src/lib/db/items.ts` and `src/lib/db/collections.ts`
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-04 — Global Search / Command Palette
+
+- Added `SearchItem` type and `getSearchItems` function to `src/lib/db/items.ts` — fetches all user items with title, type info, and a content/URL preview (first 80 chars)
+- Added `SearchCollection` type and `getSearchCollections` function to `src/lib/db/collections.ts` — fetches all user collections with item count
+- Installed shadcn `Command` component (cmdk) — creates `src/components/ui/command.tsx`, `input-group.tsx`, `textarea.tsx`
+- Created `src/components/layout/CommandPalette.tsx` — `CommandDialog` wrapping a `Command` root (required for this shadcn version); grouped Items and Collections sections; type icon per item; item count per collection; content preview below item title; item select opens global drawer, collection select navigates to `/collections/[id]`
+- Updated `src/components/layout/DashboardShell.tsx` — added `searchItems`/`searchCollections` props; replaced `<Input>` search bar with a styled `<button>` that opens the palette on click and shows ⌘K badge; added `useEffect` keyboard listener for Cmd+K / Ctrl+K; added `selectedItemId` state + global `<ItemDrawer>` at shell level so palette-triggered items open a drawer without navigating away; `<CommandPalette>` rendered at shell level
+- Updated `src/app/(dashboard)/layout.tsx` — fetches `searchItems` and `searchCollections` in `Promise.all` alongside existing sidebar data; passes both to `DashboardShell`
+- Build passes with no errors
 
 ### 2026-05-04 — Collection Management Actions
 
