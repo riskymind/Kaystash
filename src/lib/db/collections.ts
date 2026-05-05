@@ -267,6 +267,29 @@ export async function deleteCollectionInDb(collectionId: string, userId: string)
   return prisma.collection.delete({ where: { id: collectionId } });
 }
 
+export type SearchCollection = {
+  id: string;
+  name: string;
+  itemCount: number;
+};
+
+export async function getSearchCollections(userId: string): Promise<SearchCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      name: true,
+      _count: { select: { items: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return collections.map((col) => ({
+    id: col.id,
+    name: col.name,
+    itemCount: col._count.items,
+  }));
+}
+
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

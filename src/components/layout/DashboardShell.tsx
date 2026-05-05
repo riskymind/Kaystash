@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Plus, PanelLeft, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, PanelLeft, Menu, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { SidebarContent } from './SidebarContent';
-import { SidebarItemType } from '@/lib/db/items';
-import { SidebarCollection } from '@/lib/db/collections';
+import { SidebarItemType, SearchItem } from '@/lib/db/items';
+import { SidebarCollection, SearchCollection } from '@/lib/db/collections';
 import { NewItemDialog } from '@/components/items/NewItemDialog';
 import { NewCollectionDialog } from '@/components/collections/NewCollectionDialog';
+import { CommandPalette } from './CommandPalette';
+import { ItemDrawer } from '@/components/items/ItemDrawer';
 
 interface DashboardShellProps {
   children: React.ReactNode;
   itemTypes: SidebarItemType[];
   sidebarCollections: SidebarCollection[];
+  searchItems: SearchItem[];
+  searchCollections: SearchCollection[];
   user: {
     name: string | null | undefined;
     email: string | null | undefined;
@@ -21,11 +24,33 @@ interface DashboardShellProps {
   };
 }
 
-export function DashboardShell({ children, itemTypes, sidebarCollections, user }: DashboardShellProps) {
+export function DashboardShell({
+  children,
+  itemTypes,
+  sidebarCollections,
+  searchItems,
+  searchCollections,
+  user,
+}: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newItemOpen, setNewItemOpen] = useState(false);
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  const drawerCollections = sidebarCollections.map((c) => ({ id: c.id, name: c.name }));
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
@@ -58,13 +83,17 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
         </div>
 
         <div className="flex items-center flex-1 max-w-sm mx-6">
-          <div className="relative w-full">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search items..."
-              className="pl-8 h-8 text-sm bg-muted/50 border-border"
-            />
-          </div>
+          <button
+            type="button"
+            className="relative w-full flex items-center h-8 rounded-md bg-muted/50 border border-border px-2.5 text-sm text-muted-foreground cursor-pointer hover:bg-muted/70 transition-colors"
+            onClick={() => setPaletteOpen(true)}
+          >
+            <Search className="size-3.5 mr-2 shrink-0" />
+            <span className="flex-1 text-left truncate">Search items...</span>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/70 bg-muted rounded px-1 py-0.5 ml-2 shrink-0">
+              ⌘K
+            </kbd>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
@@ -138,6 +167,22 @@ export function DashboardShell({ children, itemTypes, sidebarCollections, user }
           {children}
         </main>
       </div>
+
+      {/* Global command palette */}
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        items={searchItems}
+        collections={searchCollections}
+        onItemSelect={setSelectedItemId}
+      />
+
+      {/* Global item drawer — opened from command palette */}
+      <ItemDrawer
+        itemId={selectedItemId}
+        onClose={() => setSelectedItemId(null)}
+        collections={drawerCollections}
+      />
     </div>
   );
 }

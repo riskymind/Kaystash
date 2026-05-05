@@ -288,6 +288,33 @@ export async function createItemInDb(input: CreateItemInput) {
   });
 }
 
+export type SearchItem = {
+  id: string;
+  title: string;
+  contentPreview: string | null;
+  itemType: { name: string; icon: string; color: string };
+};
+
+export async function getSearchItems(userId: string): Promise<SearchItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      url: true,
+      itemType: { select: { name: true, icon: true, color: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    contentPreview: item.content ? item.content.slice(0, 80) : (item.url ?? null),
+    itemType: item.itemType,
+  }));
+}
+
 export async function getRecentItems(userId: string, limit = 10): Promise<ItemForDashboard[]> {
   const items = await prisma.item.findMany({
     where: { userId },

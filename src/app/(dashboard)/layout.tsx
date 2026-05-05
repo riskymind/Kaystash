@@ -1,6 +1,6 @@
 import { DashboardShell } from '@/components/layout/DashboardShell';
-import { getSidebarCollections } from '@/lib/db/collections';
-import { getItemTypesWithCounts } from '@/lib/db/items';
+import { getSidebarCollections, getSearchCollections } from '@/lib/db/collections';
+import { getItemTypesWithCounts, getSearchItems } from '@/lib/db/items';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
@@ -14,9 +14,11 @@ export default async function DashboardLayout({
 
   const userId = session.user.id;
 
-  const [itemTypes, sidebarCollections] = await Promise.all([
+  const [itemTypes, sidebarCollections, searchItems, searchCollections] = await Promise.all([
     getItemTypesWithCounts(userId),
     getSidebarCollections(userId),
+    getSearchItems(userId),
+    getSearchCollections(userId),
   ]);
 
   const user = {
@@ -26,7 +28,13 @@ export default async function DashboardLayout({
   };
 
   return (
-    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections} user={user}>
+    <DashboardShell
+      itemTypes={itemTypes}
+      sidebarCollections={sidebarCollections}
+      searchItems={searchItems}
+      searchCollections={searchCollections}
+      user={user}
+    >
       {children}
     </DashboardShell>
   );
