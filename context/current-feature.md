@@ -11,6 +11,16 @@ Completed
 
 ## History
 
+### 2026-05-05 — Pagination
+
+- Created `src/lib/constants/pagination.ts` — `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`, `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
+- Updated `getItemsByType` in `src/lib/db/items.ts` — accepts `page` and `pageSize`, uses `skip`/`take`, runs parallel `count` query; returns `{ items, totalCount }`
+- Updated `getItemsInCollection` in `src/lib/db/collections.ts` — same paginated pattern; returns `{ items, totalCount }`
+- Created `src/components/shared/Pagination.tsx` — server component; numbered page links with ellipsis for large page counts; prev/next chevrons rendered as non-clickable greyed spans at the boundaries
+- Updated `src/app/(dashboard)/items/[type]/page.tsx` — reads `?page=N` from `searchParams`, passes to `getItemsByType`, renders `<Pagination>` below the grid
+- Updated `src/app/(dashboard)/collections/[id]/page.tsx` — same pattern; uses `collection.itemCount` (total) for page math, `getItemsInCollection` for current-page items
+- Build passes with no errors
+
 ### 2026-05-04 — Global Search / Command Palette
 
 - Added `SearchItem` type and `getSearchItems` function to `src/lib/db/items.ts` — fetches all user items with title, type info, and a content/URL preview (first 80 chars)
