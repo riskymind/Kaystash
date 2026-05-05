@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, Settings, User } from 'lucide-react';
 import { signOutAction } from '@/actions/auth';
 
 interface UserAvatarProps {
@@ -55,6 +55,13 @@ export function UserAvatar({ name, email, image, collapsed = false }: UserAvatar
         >
           <User className="size-3.5" />
           Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => router.push('/settings')}
+        >
+          <Settings className="size-3.5" />
+          Settings
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -2,8 +2,6 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getProfileUser, getProfileStats } from '@/lib/db/profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm';
-import { DeleteAccountDialog } from '@/components/profile/DeleteAccountDialog';
 import {
   Code,
   Sparkles,
@@ -116,29 +114,6 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      {/* Change password — credential accounts only */}
-      {user.hasPassword && (
-        <section className="rounded-lg border border-border bg-card p-5 space-y-4">
-          <div>
-            <h2 className="text-sm font-semibold">Change password</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Update the password for your account.
-            </p>
-          </div>
-          <ChangePasswordForm />
-        </section>
-      )}
-
-      {/* Danger zone */}
-      <section className="rounded-lg border border-destructive/40 bg-card p-5 space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold text-destructive">Danger zone</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Permanently delete your account and all associated data.
-          </p>
-        </div>
-        <DeleteAccountDialog />
-      </section>
     </div>
   );
 }
