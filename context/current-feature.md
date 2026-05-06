@@ -1,15 +1,34 @@
 # Current Feature
 
 ## Status
-Completed
+Not Started
 
 ## Goals
 
+<!-- List goals here -->
+
 ## Notes
+
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-06 — Editor Preferences Settings
+
+- Created `src/types/editor-preferences.ts` — `EditorPreferences` interface, `DEFAULT_EDITOR_PREFERENCES`, `FONT_SIZE_OPTIONS`, `TAB_SIZE_OPTIONS`, `THEME_OPTIONS`
+- Added `editorPreferences Json?` column to User model; migration at `prisma/migrations/20260505000000_add_editor_preferences/`
+- Added `getEditorPreferences` to `src/lib/db/profile.ts` — fetches and merges stored prefs with defaults
+- Created `src/contexts/EditorPreferencesContext.tsx` — `EditorPreferencesProvider` initialised from DB prefs; `useEditorPreferences` hook
+- Updated `src/app/(dashboard)/layout.tsx` — fetches `editorPreferences` in `Promise.all`, wraps layout in `EditorPreferencesProvider`
+- Created `src/actions/settings.ts` — `updateEditorPreferencesAction` server action; auto-saves full prefs object on each control change
+- Created `src/components/settings/EditorPreferencesForm.tsx` — font size and tab size dropdowns, theme dropdown (vs-dark / monokai / github-dark), word wrap and minimap toggles; success/error toast on each change; uses `useTransition` to disable controls while saving
+- Updated `src/app/(dashboard)/settings/page.tsx` — renders `EditorPreferencesForm` in a new "Editor preferences" section above Change Password
+- Updated `src/components/items/CodeEditor.tsx` — registers monokai and github-dark custom themes via `loader.init()`; reads `preferences` from context and applies `theme`, `fontSize`, `tabSize`, `wordWrap`, `minimap` to Monaco options
+- Updated `prisma.config.ts` — migration datasource prefers `DIRECT_URL` (non-pooled) over `DATABASE_URL` to support Neon pooler setups
+- Updated `src/components/layout/DashboardShell.tsx` — kaystash logo (top bar + mobile drawer) now links to `/dashboard`
+- Build passes with no errors
 
 ### 2026-05-05 — Settings Page
 
