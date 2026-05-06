@@ -1,28 +1,31 @@
-# Current Feature: Favorite Toggle Button
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add a working favorite toggle button to the Item Drawer (currently rendered but disabled)
-- Add a working favorite toggle button to Collection Detail page actions (currently rendered but disabled in `CollectionDetailActions`)
-- Add a working favorite toggle button to Collection cards (`CollectionCardWithMenu` dropdown currently has Favorite as disabled)
-- Toggling favorite updates the DB and reflects immediately in the UI (optimistic or via refresh)
-- Favorite state is visible: filled star icon when favorited, outline when not
+<!-- List goals here -->
 
 ## Notes
 
-- `isFavorite` field exists on both `Item` and `Collection` models — no schema change needed
-- Server actions for toggling items can live in `src/actions/items.ts` and collections in `src/actions/collections.ts`
-- Item drawer already has a Star button in its action bar — it just needs to be wired up
-- `CollectionDetailActions` already has a Favorite button placeholder — wire it up
-- `CollectionCardWithMenu` dropdown has a disabled Favorite menu item — wire it up
-- Keep the pattern: server action returns `{ success, error }`, toast on result, `router.refresh()` to sync
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-06 — Favorite Toggle Button
+
+- Added `toggleItemFavoriteInDb` to `src/lib/db/items.ts` — finds item by ownership, flips `isFavorite`, returns new value
+- Added `toggleCollectionFavoriteInDb` to `src/lib/db/collections.ts` — same pattern for collections
+- Added `toggleItemFavoriteAction` to `src/actions/items.ts` — auth-checked server action; returns `{ success, isFavorite }`
+- Added `toggleCollectionFavoriteAction` to `src/actions/collections.ts` — same pattern
+- Updated `src/components/items/ItemDrawer.tsx` — Favorite button now calls `toggleItemFavoriteAction`; optimistic update (star fills immediately, reverts on error); button disabled while in-flight
+- Updated `src/components/collections/CollectionDetailActions.tsx` — added `isFavorite` prop + local state; Favorite button wired to `toggleCollectionFavoriteAction`; was previously `disabled`; star fills when favorited
+- Updated `src/components/collections/CollectionCardWithMenu.tsx` — dropdown "Favorite/Unfavorite" item wired to `toggleCollectionFavoriteAction`; star in card header reflects local state; label changes to "Unfavorite" when already favorited
+- Updated `src/app/(dashboard)/collections/[id]/page.tsx` — passes `isFavorite` to `CollectionDetailActions`
+- Build passes with no errors
 
 ### 2026-05-06 — Favorites Page
 
