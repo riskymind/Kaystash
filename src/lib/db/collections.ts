@@ -313,6 +313,58 @@ export async function getSearchCollections(userId: string): Promise<SearchCollec
   }));
 }
 
+export type FavoriteCollection = {
+  id: string;
+  name: string;
+  updatedAt: Date;
+  itemCount: number;
+  dominantColor: string;
+};
+
+export async function getFavoriteCollections(userId: string): Promise<FavoriteCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      items: {
+        include: {
+          item: { include: { itemType: true } },
+        },
+      },
+    },
+  });
+
+  return collections.map((col) => {
+    const typeCounts = new Map<string, { count: number; color: string }>();
+    for (const ic of col.items) {
+      const t = ic.item.itemType;
+      const existing = typeCounts.get(t.id);
+      if (existing) {
+        existing.count++;
+      } else {
+        typeCounts.set(t.id, { count: 1, color: t.color });
+      }
+    }
+
+    let dominantColor = '#6b7280';
+    let maxCount = 0;
+    for (const { count, color } of typeCounts.values()) {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantColor = color;
+      }
+    }
+
+    return {
+      id: col.id,
+      name: col.name,
+      updatedAt: col.updatedAt,
+      itemCount: col.items.length,
+      dominantColor,
+    };
+  });
+}
+
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count({ where: { userId } }),

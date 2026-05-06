@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, PanelLeft, Menu, X, Search } from 'lucide-react';
+import { Plus, PanelLeft, Menu, X, Search, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarContent } from './SidebarContent';
 import { SidebarItemType, SearchItem } from '@/lib/db/items';
@@ -98,6 +98,13 @@ export function DashboardShell({
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/favorites"
+            aria-label="Favorites"
+            className="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Star className="size-4" />
+          </Link>
           <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setNewCollectionOpen(true)}>
             <Plus className="size-3.5" />
             New Collection

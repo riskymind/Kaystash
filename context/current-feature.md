@@ -1,15 +1,25 @@
-# Current Feature
+# Current Feature: Favorites Page
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add star icon button to TopBar linking to `/favorites`
+- Create `/favorites` route with auth protection
+- Fetch all user favorited items and collections
+- Compact, high-density list view (VS Code/terminal style — no cards)
+- Each row: type icon, title, type badge, date added
+- Separate sections for Items and Collections with counts
+- Click item opens `ItemDrawer`; click collection navigates to `/collections/[id]`
+- Empty state when no favorites exist
+- Sort by most recently favorited (`updatedAt`)
 
 ## Notes
 
-<!-- Add notes here -->
+- UI style: monospace/semi-monospace font, minimal padding, subtle hover states, clean lines only (no heavy borders or cards)
+- Reuse `ItemDrawer` and existing drawer state pattern from `ItemCardsWithDrawer`
+- Collections section links directly — no drawer needed
 
 <!-- Keep this updated. Earliest to latest -->
 
