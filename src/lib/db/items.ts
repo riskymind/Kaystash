@@ -102,7 +102,7 @@ export async function getItemsByType(
   const [items, totalCount] = await Promise.all([
     prisma.item.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
       skip,
       take: pageSize,
       include: { itemType: true, tags: true },
@@ -279,6 +279,20 @@ export async function deleteItemInDb(itemId: string, userId: string): Promise<bo
   if (!existing) return false;
   await prisma.item.delete({ where: { id: itemId } });
   return true;
+}
+
+export async function toggleItemPinInDb(
+  itemId: string,
+  userId: string,
+): Promise<boolean | null> {
+  const existing = await prisma.item.findFirst({ where: { id: itemId, userId }, select: { isPinned: true } });
+  if (!existing) return null;
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isPinned: !existing.isPinned },
+    select: { isPinned: true },
+  });
+  return updated.isPinned;
 }
 
 export async function toggleItemFavoriteInDb(

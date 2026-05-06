@@ -40,7 +40,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { ItemDetail } from '@/lib/db/items';
-import { updateItemAction, deleteItemAction, toggleItemFavoriteAction } from '@/actions/items';
+import { updateItemAction, deleteItemAction, toggleItemFavoriteAction, toggleItemPinAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 
@@ -135,6 +135,23 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [togglingFavorite, setTogglingFavorite] = useState(false);
+  const [togglingPin, setTogglingPin] = useState(false);
+
+  async function handleTogglePin() {
+    if (!item) return;
+    setTogglingPin(true);
+    const prev = item.isPinned;
+    setItem({ ...item, isPinned: !prev });
+    const result = await toggleItemPinAction(item.id);
+    setTogglingPin(false);
+    if (!result.success) {
+      setItem({ ...item, isPinned: prev });
+      toast.error(result.error);
+      return;
+    }
+    setItem((cur) => cur ? { ...cur, isPinned: result.isPinned } : cur);
+    router.refresh();
+  }
 
   async function handleToggleFavorite() {
     if (!item) return;
@@ -309,15 +326,17 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
               </button>
 
               <button
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                onClick={handleTogglePin}
+                disabled={togglingPin}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
                   item.isPinned
                     ? 'text-foreground bg-muted'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
-                title="Pin"
+                title={item.isPinned ? 'Unpin' : 'Pin'}
               >
-                <Pin className="size-3.5" />
-                Pin
+                <Pin className={`size-3.5 ${item.isPinned ? 'fill-foreground' : ''}`} />
+                {item.isPinned ? 'Unpin' : 'Pin'}
               </button>
 
               <button

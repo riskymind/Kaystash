@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createItemInDb, updateItemInDb, deleteItemInDb, toggleItemFavoriteInDb, ItemDetail } from '@/lib/db/items';
+import { createItemInDb, updateItemInDb, deleteItemInDb, toggleItemFavoriteInDb, toggleItemPinInDb, ItemDetail } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
 
 const CONTENT_TYPES = {
@@ -175,4 +175,18 @@ export async function toggleItemFavoriteAction(itemId: string): Promise<ToggleFa
   if (result === null) return { success: false, error: 'Item not found or access denied.' };
 
   return { success: true, isFavorite: result };
+}
+
+type TogglePinResult =
+  | { success: true; isPinned: boolean }
+  | { success: false; error: string };
+
+export async function toggleItemPinAction(itemId: string): Promise<TogglePinResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const result = await toggleItemPinInDb(itemId, session.user.id);
+  if (result === null) return { success: false, error: 'Item not found or access denied.' };
+
+  return { success: true, isPinned: result };
 }
