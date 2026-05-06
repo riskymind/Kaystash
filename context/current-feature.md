@@ -1,29 +1,28 @@
-# Current Feature: Favorites Page
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add star icon button to TopBar linking to `/favorites`
-- Create `/favorites` route with auth protection
-- Fetch all user favorited items and collections
-- Compact, high-density list view (VS Code/terminal style — no cards)
-- Each row: type icon, title, type badge, date added
-- Separate sections for Items and Collections with counts
-- Click item opens `ItemDrawer`; click collection navigates to `/collections/[id]`
-- Empty state when no favorites exist
-- Sort by most recently favorited (`updatedAt`)
+<!-- List goals here -->
 
 ## Notes
 
-- UI style: monospace/semi-monospace font, minimal padding, subtle hover states, clean lines only (no heavy borders or cards)
-- Reuse `ItemDrawer` and existing drawer state pattern from `ItemCardsWithDrawer`
-- Collections section links directly — no drawer needed
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-06 — Favorites Page
+
+- Added `getFavoriteItems` to `src/lib/db/items.ts` — fetches all user items where `isFavorite: true`, ordered by `updatedAt` desc
+- Added `FavoriteCollection` type and `getFavoriteCollections` to `src/lib/db/collections.ts` — fetches favorited collections, computes dominant color from most-used item type
+- Created `src/components/favorites/FavoritesList.tsx` — client component; two sections (Items, Collections) each with count; item rows are buttons opening `ItemDrawer`; collection rows are `<Link>`s to `/collections/[id]`; compact monospace style with type icon, title, type badge, and date; empty state when nothing favorited
+- Created `src/app/(dashboard)/favorites/page.tsx` — server component; auth-protected; fetches favorites + selectable collections in `Promise.all`; renders `<FavoritesList>`
+- Updated `src/components/layout/DashboardShell.tsx` — added `Star` icon `<Link>` to TopBar between search and New Collection buttons, linking to `/favorites`
+- Build passes with no errors
 
 ### 2026-05-06 — Editor Preferences Settings
 
