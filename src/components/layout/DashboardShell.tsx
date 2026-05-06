@@ -8,6 +8,7 @@ import { SidebarItemType, SearchItem } from '@/lib/db/items';
 import { SidebarCollection, SearchCollection } from '@/lib/db/collections';
 import { NewItemDialog } from '@/components/items/NewItemDialog';
 import { NewCollectionDialog } from '@/components/collections/NewCollectionDialog';
+import Link from 'next/link';
 import { CommandPalette } from './CommandPalette';
 import { ItemDrawer } from '@/components/items/ItemDrawer';
 
@@ -79,7 +80,7 @@ export function DashboardShell({
             <PanelLeft className="size-4" />
           </Button>
 
-          <span className="text-sm font-semibold tracking-tight">kaystash</span>
+          <Link href="/dashboard" className="text-sm font-semibold tracking-tight">kaystash</Link>
         </div>
 
         <div className="flex items-center flex-1 max-w-sm mx-6">
@@ -139,7 +140,7 @@ export function DashboardShell({
             {/* Panel */}
             <div className="absolute inset-y-0 left-0 w-56 bg-background border-r border-border flex flex-col shadow-xl">
               <div className="flex items-center justify-between px-3 h-14 border-b border-border shrink-0">
-                <span className="text-sm font-semibold tracking-tight">kaystash</span>
+                <Link href="/dashboard" className="text-sm font-semibold tracking-tight">kaystash</Link>
                 <Button
                   variant="ghost"
                   size="icon"

@@ -10,6 +10,7 @@ export default defineConfig({
   datasource: {
     // process.env allows this to be absent during `prisma generate` (no DB needed).
     // `prisma migrate dev` and `prisma migrate deploy` will fail clearly if unset.
-    url: process.env.DATABASE_URL,
+    // DIRECT_URL must be the non-pooled Neon URL (no -pooler in hostname) — required for migrations.
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
   },
 });

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getProfileUser } from '@/lib/db/profile';
 import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm';
 import { DeleteAccountDialog } from '@/components/profile/DeleteAccountDialog';
+import { EditorPreferencesForm } from '@/components/settings/EditorPreferencesForm';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -17,6 +18,16 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-semibold">Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your account settings</p>
       </div>
+
+      <section className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold">Editor preferences</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Customize the code editor appearance and behavior.
+          </p>
+        </div>
+        <EditorPreferencesForm />
+      </section>
 
       {user.hasPassword && (
         <section className="rounded-lg border border-border bg-card p-5 space-y-4">

@@ -1,8 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import Editor, { OnMount } from '@monaco-editor/react';
+import Editor, { OnMount, loader } from '@monaco-editor/react';
 import { Copy, Check } from 'lucide-react';
+import { useEditorPreferences } from '@/contexts/EditorPreferencesContext';
+
+// Register monokai and github-dark themes on first load
+loader.init().then((monaco) => {
+  monaco.editor.defineTheme('monokai', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '75715e', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'f92672' },
+      { token: 'string', foreground: 'e6db74' },
+      { token: 'number', foreground: 'ae81ff' },
+      { token: 'type', foreground: '66d9ef', fontStyle: 'italic' },
+      { token: 'function', foreground: 'a6e22e' },
+      { token: 'variable', foreground: 'f8f8f2' },
+    ],
+    colors: {
+      'editor.background': '#272822',
+      'editor.foreground': '#f8f8f2',
+      'editor.lineHighlightBackground': '#3e3d32',
+      'editorLineNumber.foreground': '#75715e',
+      'editor.selectionBackground': '#49483e',
+    },
+  });
+
+  monaco.editor.defineTheme('github-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '8b949e', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'ff7b72' },
+      { token: 'string', foreground: 'a5d6ff' },
+      { token: 'number', foreground: '79c0ff' },
+      { token: 'type', foreground: 'ffa657' },
+      { token: 'function', foreground: 'd2a8ff' },
+      { token: 'variable', foreground: 'e6edf3' },
+    ],
+    colors: {
+      'editor.background': '#0d1117',
+      'editor.foreground': '#e6edf3',
+      'editor.lineHighlightBackground': '#161b22',
+      'editorLineNumber.foreground': '#6e7681',
+      'editor.selectionBackground': '#264f78',
+    },
+  });
+});
 
 interface CodeEditorProps {
   value: string;
@@ -17,6 +63,7 @@ const MAX_HEIGHT = 400;
 export function CodeEditor({ value, language, readOnly = false, onChange }: CodeEditorProps) {
   const [copied, setCopied] = useState(false);
   const [editorHeight, setEditorHeight] = useState(MIN_HEIGHT);
+  const { preferences } = useEditorPreferences();
 
   async function handleCopy() {
     await navigator.clipboard.writeText(value);
@@ -35,7 +82,6 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
 
   return (
     <div className="rounded-md overflow-hidden border border-border bg-[#1e1e1e]">
-      {/* macOS-style header */}
       <div className="flex items-center justify-between px-3 py-2 bg-[#2d2d2d] border-b border-[#404040]">
         <div className="flex items-center gap-1.5">
           <span className="size-3 rounded-full bg-[#ff5f57]" />
@@ -57,23 +103,23 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
         </div>
       </div>
 
-      {/* Wrapper div drives the height; Monaco fills it via height="100%" */}
       <div style={{ height: editorHeight }}>
         <Editor
           height="100%"
           value={value}
           language={language?.toLowerCase() ?? 'plaintext'}
-          theme="vs-dark"
+          theme={preferences.theme}
           options={{
             readOnly,
-            minimap: { enabled: false },
+            minimap: { enabled: preferences.minimap },
             scrollBeyondLastLine: false,
             automaticLayout: true,
-            fontSize: 13,
-            lineHeight: 20,
+            fontSize: preferences.fontSize,
+            tabSize: preferences.tabSize,
+            lineHeight: Math.round(preferences.fontSize * 1.6),
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
             padding: { top: 12, bottom: 12 },
-            wordWrap: 'on',
+            wordWrap: preferences.wordWrap,
             scrollbar: {
               vertical: 'auto',
               horizontal: 'auto',
