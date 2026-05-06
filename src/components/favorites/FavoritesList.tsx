@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Code,
@@ -29,8 +29,32 @@ const ICON_MAP = {
 
 type IconName = keyof typeof ICON_MAP;
 
+type SortKey = 'name-asc' | 'name-desc' | 'date-desc' | 'date-asc' | 'type-asc';
+
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function SortSelect({
+  value,
+  onChange,
+}: {
+  value: SortKey;
+  onChange: (v: SortKey) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as SortKey)}
+      className="ml-auto text-[10px] font-mono bg-transparent text-muted-foreground border border-border/40 rounded px-1.5 py-0.5 cursor-pointer hover:border-border/80 focus:outline-none"
+    >
+      <option value="date-desc">Newest</option>
+      <option value="date-asc">Oldest</option>
+      <option value="name-asc">Name A–Z</option>
+      <option value="name-desc">Name Z–A</option>
+      <option value="type-asc">Type A–Z</option>
+    </select>
+  );
 }
 
 interface FavoritesListProps {
@@ -41,6 +65,42 @@ interface FavoritesListProps {
 
 export function FavoritesList({ items, collections, drawerCollections }: FavoritesListProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [itemSort, setItemSort] = useState<SortKey>('date-desc');
+  const [collectionSort, setCollectionSort] = useState<SortKey>('date-desc');
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      switch (itemSort) {
+        case 'name-asc':
+          return a.title.localeCompare(b.title);
+        case 'name-desc':
+          return b.title.localeCompare(a.title);
+        case 'date-asc':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'date-desc':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'type-asc':
+          return a.itemType.name.localeCompare(b.itemType.name);
+      }
+    });
+  }, [items, itemSort]);
+
+  const sortedCollections = useMemo(() => {
+    return [...collections].sort((a, b) => {
+      switch (collectionSort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'date-asc':
+          return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        case 'date-desc':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        case 'type-asc':
+          return a.dominantTypeName.localeCompare(b.dominantTypeName);
+      }
+    });
+  }, [collections, collectionSort]);
 
   const hasItems = items.length > 0;
   const hasCollections = collections.length > 0;
@@ -64,9 +124,10 @@ export function FavoritesList({ items, collections, drawerCollections }: Favorit
               Items
             </span>
             <span className="text-xs font-mono text-muted-foreground/50">({items.length})</span>
+            <SortSelect value={itemSort} onChange={setItemSort} />
           </div>
           <div>
-            {items.map((item) => {
+            {sortedItems.map((item) => {
               const Icon = ICON_MAP[item.itemType.icon as IconName] ?? Box;
               const color = item.itemType.color;
               return (
@@ -111,9 +172,10 @@ export function FavoritesList({ items, collections, drawerCollections }: Favorit
             <span className="text-xs font-mono text-muted-foreground/50">
               ({collections.length})
             </span>
+            <SortSelect value={collectionSort} onChange={setCollectionSort} />
           </div>
           <div>
-            {collections.map((col) => (
+            {sortedCollections.map((col) => (
               <Link
                 key={col.id}
                 href={`/collections/${col.id}`}
