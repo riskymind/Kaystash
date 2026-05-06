@@ -1,15 +1,23 @@
-# Current Feature
+# Current Feature: Favorites Page Sorting
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add a sort control to the favorites page (both Items and Collections sections)
+- Support sorting by **name** (A–Z / Z–A), **date** (newest first / oldest first), and **type** (alphabetical by type name)
+- Sorting is client-side — no page reload or server round-trip
+- Each section (Items, Collections) has its own independent sort state
+- Default sort is by date descending (newest first) to match existing behavior
 
 ## Notes
 
-<!-- Add notes here -->
+- The sort control lives inside `src/components/favorites/FavoritesList.tsx` (client component) — no server changes needed
+- Items sort by `title`, `updatedAt`, or `itemType.name`
+- Collections sort by `name`, `updatedAt`, or dominant type color label (type name from most-used item type)
+- Use a simple dropdown or segmented control — keep it consistent with the rest of the dashboard aesthetic (dark, minimal)
+- Each section's sort is independent (sorting items doesn't affect collections sort)
 
 <!-- Keep this updated. Earliest to latest -->
 

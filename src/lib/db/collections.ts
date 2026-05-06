@@ -336,6 +336,7 @@ export type FavoriteCollection = {
   updatedAt: Date;
   itemCount: number;
   dominantColor: string;
+  dominantTypeName: string;
 };
 
 export async function getFavoriteCollections(userId: string): Promise<FavoriteCollection[]> {
@@ -352,23 +353,25 @@ export async function getFavoriteCollections(userId: string): Promise<FavoriteCo
   });
 
   return collections.map((col) => {
-    const typeCounts = new Map<string, { count: number; color: string }>();
+    const typeCounts = new Map<string, { count: number; color: string; name: string }>();
     for (const ic of col.items) {
       const t = ic.item.itemType;
       const existing = typeCounts.get(t.id);
       if (existing) {
         existing.count++;
       } else {
-        typeCounts.set(t.id, { count: 1, color: t.color });
+        typeCounts.set(t.id, { count: 1, color: t.color, name: t.name });
       }
     }
 
     let dominantColor = '#6b7280';
+    let dominantTypeName = '';
     let maxCount = 0;
-    for (const { count, color } of typeCounts.values()) {
+    for (const { count, color, name } of typeCounts.values()) {
       if (count > maxCount) {
         maxCount = count;
         dominantColor = color;
+        dominantTypeName = name;
       }
     }
 
@@ -378,6 +381,7 @@ export async function getFavoriteCollections(userId: string): Promise<FavoriteCo
       updatedAt: col.updatedAt,
       itemCount: col.items.length,
       dominantColor,
+      dominantTypeName,
     };
   });
 }
