@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Code,
   Sparkles,
@@ -15,6 +16,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -24,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EditCollectionDialog } from './EditCollectionDialog';
 import { DeleteCollectionDialog } from './DeleteCollectionDialog';
+import { toggleCollectionFavoriteAction } from '@/actions/collections';
 import type { CollectionForDashboard } from '@/lib/db/collections';
 
 const ICON_MAP = {
@@ -44,8 +47,23 @@ interface CollectionCardWithMenuProps {
 }
 
 export function CollectionCardWithMenu({ col, onDeleteSuccess }: CollectionCardWithMenuProps) {
+  const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(col.isFavorite);
+
+  async function handleToggleFavorite() {
+    const prev = isFavorite;
+    setIsFavorite(!prev);
+    const result = await toggleCollectionFavoriteAction(col.id);
+    if (!result.success) {
+      setIsFavorite(prev);
+      toast.error(result.error);
+      return;
+    }
+    setIsFavorite(result.isFavorite);
+    router.refresh();
+  }
 
   return (
     <>
@@ -57,7 +75,7 @@ export function CollectionCardWithMenu({ col, onDeleteSuccess }: CollectionCardW
         <Link href={`/collections/${col.id}`} className="block p-4 pr-10">
           <div className="flex items-center gap-1.5 min-w-0 mb-1">
             <span className="text-sm font-medium truncate">{col.name}</span>
-            {col.isFavorite && (
+            {isFavorite && (
               <Star className="size-3 fill-yellow-400 text-yellow-400 shrink-0" />
             )}
           </div>
@@ -102,13 +120,9 @@ export function CollectionCardWithMenu({ col, onDeleteSuccess }: CollectionCardW
                 <Pencil />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => {
-                  /* favorite not implemented yet */
-                }}
-              >
-                <Star />
-                Favorite
+              <DropdownMenuItem onSelect={handleToggleFavorite}>
+                <Star className={isFavorite ? 'fill-yellow-400 text-yellow-400' : ''} />
+                {isFavorite ? 'Unfavorite' : 'Favorite'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={() => setDeleteOpen(true)}>

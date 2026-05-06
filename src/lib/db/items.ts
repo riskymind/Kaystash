@@ -281,6 +281,20 @@ export async function deleteItemInDb(itemId: string, userId: string): Promise<bo
   return true;
 }
 
+export async function toggleItemFavoriteInDb(
+  itemId: string,
+  userId: string,
+): Promise<boolean | null> {
+  const existing = await prisma.item.findFirst({ where: { id: itemId, userId }, select: { isFavorite: true } });
+  if (!existing) return null;
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isFavorite: !existing.isFavorite },
+    select: { isFavorite: true },
+  });
+  return updated.isFavorite;
+}
+
 export async function createItemInDb(input: CreateItemInput) {
   const { tags, collectionIds, userId, ...rest } = input;
 

@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createItemInDb, updateItemInDb, deleteItemInDb, ItemDetail } from '@/lib/db/items';
+import { createItemInDb, updateItemInDb, deleteItemInDb, toggleItemFavoriteInDb, ItemDetail } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
 
 const CONTENT_TYPES = {
@@ -161,4 +161,18 @@ export async function deleteItemAction(itemId: string): Promise<DeleteActionResu
   if (!deleted) return { success: false, error: 'Item not found or access denied.' };
 
   return { success: true };
+}
+
+type ToggleFavoriteResult =
+  | { success: true; isFavorite: boolean }
+  | { success: false; error: string };
+
+export async function toggleItemFavoriteAction(itemId: string): Promise<ToggleFavoriteResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const result = await toggleItemFavoriteInDb(itemId, session.user.id);
+  if (result === null) return { success: false, error: 'Item not found or access denied.' };
+
+  return { success: true, isFavorite: result };
 }

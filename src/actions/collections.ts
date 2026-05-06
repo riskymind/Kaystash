@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createCollectionInDb, updateCollectionInDb, deleteCollectionInDb } from '@/lib/db/collections';
+import { createCollectionInDb, updateCollectionInDb, deleteCollectionInDb, toggleCollectionFavoriteInDb } from '@/lib/db/collections';
 
 const createCollectionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -90,4 +90,20 @@ export async function deleteCollectionAction(collectionId: string): Promise<Dele
   if (!result) return { success: false, error: 'Collection not found.' };
 
   return { success: true };
+}
+
+type ToggleCollectionFavoriteResult =
+  | { success: true; isFavorite: boolean }
+  | { success: false; error: string };
+
+export async function toggleCollectionFavoriteAction(
+  collectionId: string,
+): Promise<ToggleCollectionFavoriteResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const result = await toggleCollectionFavoriteInDb(collectionId, session.user.id);
+  if (result === null) return { success: false, error: 'Collection not found.' };
+
+  return { success: true, isFavorite: result };
 }

@@ -40,7 +40,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { ItemDetail } from '@/lib/db/items';
-import { updateItemAction, deleteItemAction } from '@/actions/items';
+import { updateItemAction, deleteItemAction, toggleItemFavoriteAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 
@@ -134,6 +134,23 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
   const [editCollectionIds, setEditCollectionIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
+
+  async function handleToggleFavorite() {
+    if (!item) return;
+    setTogglingFavorite(true);
+    const prev = item.isFavorite;
+    setItem({ ...item, isFavorite: !prev });
+    const result = await toggleItemFavoriteAction(item.id);
+    setTogglingFavorite(false);
+    if (!result.success) {
+      setItem({ ...item, isFavorite: prev });
+      toast.error(result.error);
+      return;
+    }
+    setItem((cur) => cur ? { ...cur, isFavorite: result.isFavorite } : cur);
+    router.refresh();
+  }
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
@@ -278,12 +295,14 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
             {/* Action bar — view mode */}
             <div className="flex items-center gap-1">
               <button
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                onClick={handleToggleFavorite}
+                disabled={togglingFavorite}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
                   item.isFavorite
                     ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
-                title="Favorite"
+                title={item.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Star className={`size-3.5 ${item.isFavorite ? 'fill-yellow-400' : ''}`} />
                 Favorite
