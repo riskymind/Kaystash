@@ -1,15 +1,24 @@
-# Current Feature
+# Current Feature: Favorite Toggle Button
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add a working favorite toggle button to the Item Drawer (currently rendered but disabled)
+- Add a working favorite toggle button to Collection Detail page actions (currently rendered but disabled in `CollectionDetailActions`)
+- Add a working favorite toggle button to Collection cards (`CollectionCardWithMenu` dropdown currently has Favorite as disabled)
+- Toggling favorite updates the DB and reflects immediately in the UI (optimistic or via refresh)
+- Favorite state is visible: filled star icon when favorited, outline when not
 
 ## Notes
 
-<!-- Add notes here -->
+- `isFavorite` field exists on both `Item` and `Collection` models — no schema change needed
+- Server actions for toggling items can live in `src/actions/items.ts` and collections in `src/actions/collections.ts`
+- Item drawer already has a Star button in its action bar — it just needs to be wired up
+- `CollectionDetailActions` already has a Favorite button placeholder — wire it up
+- `CollectionCardWithMenu` dropdown has a disabled Favorite menu item — wire it up
+- Keep the pattern: server action returns `{ success, error }`, toast on result, `router.refresh()` to sync
 
 <!-- Keep this updated. Earliest to latest -->
 
