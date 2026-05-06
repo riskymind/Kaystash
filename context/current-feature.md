@@ -1,28 +1,27 @@
-# Current Feature: Pinned Items
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create `toggleItemPinAction` server action (auth-checked, returns `{ success, isPinned }`)
-- Wire up the Pin button in `ItemDrawer` with optimistic UI (pin fills immediately, reverts on error)
-- Button disabled while in-flight (same pattern as Favorite button)
-- Toast notification on success/error
-- Pinned items sort to the top of item type listings (`/items/[type]`)
-- Pin icon on `ItemCard` remains a static display indicator (no change needed)
-- Items only — no collection pinning
+<!-- List goals here -->
 
 ## Notes
 
-- Follow the Favorite Button pattern exactly (`toggleItemFavoriteAction` in `src/actions/items.ts` and the optimistic update in `ItemDrawer`)
-- DB function: `toggleItemPinInDb` in `src/lib/db/items.ts` — finds item by ownership, flips `isPinned`, returns new value
-- Dashboard pinned section already fetches `getPinnedItems` — `router.refresh()` after toggle will update it automatically
-- Sort pinned items to top: update `getItemsByType` query to `orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }]`
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-06 — Pinned Items
+
+- Added `toggleItemPinInDb` to `src/lib/db/items.ts` — finds item by ownership, flips `isPinned`, returns new value
+- Added `toggleItemPinAction` to `src/actions/items.ts` — auth-checked server action; returns `{ success, isPinned }`
+- Updated `src/components/items/ItemDrawer.tsx` — Pin button now calls `toggleItemPinAction`; optimistic update (pin fills immediately, reverts on error); button disabled while in-flight; label toggles between "Pin" and "Unpin"
+- Updated `getItemsByType` in `src/lib/db/items.ts` — `orderBy` now `[{ isPinned: 'desc' }, { createdAt: 'desc' }]` so pinned items sort to the top of `/items/[type]` listings
+- Build passes with no errors
 
 ### 2026-05-06 — Favorites Page Sorting
 
