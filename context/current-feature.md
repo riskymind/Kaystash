@@ -1,26 +1,25 @@
 # Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-Declutter the dashboard top bar on small screens (< lg / < 1024px) using icon-only collapse:
-
-- **Search bar**: hide the full pill input on mobile; show a `🔍` icon button instead that opens the command palette
-- **New Collection**: hide from topbar on mobile (accessible via sidebar drawer)
-- **New Item**: show only the `+` icon on mobile, hide the label text
-- **Favorites star**: unchanged (already icon-only)
-
-Result on mobile: `[☰] [kaystash] ············ [🔍] [★] [+]`
+<!-- List goals here -->
 
 ## Notes
 
-- All changes are in `src/components/layout/DashboardShell.tsx` only
-- No new components needed
-- Uses responsive Tailwind classes (`hidden lg:flex`, `hidden lg:inline`, `lg:hidden`)
+<!-- Add notes here -->
 
 ## History
+
+### 2026-05-08 — Mobile Topbar Declutter + Fixes
+
+- Updated `src/components/layout/DashboardShell.tsx` — on `< lg` screens: full search pill is `hidden lg:flex`; a `🔍` icon button (`lg:hidden`) opens the command palette; "New Collection" button is `hidden lg:flex`; "New Item" label text is `hidden lg:inline` (icon always visible); `ml-auto` added to right section so it stays flush right when the search bar is absent
+- Fixed `src/components/items/CodeEditor.tsx` — moved `loader.init()` theme registration from module-level (ran on the server, causing `window is not defined` 500) into a `useEffect` (client-only); also added `useEffect` to import list
+- Created `src/components/collections/NewCollectionButton.tsx` — minimal `'use client'` wrapper that owns the `open` state and renders the trigger button + `NewCollectionDialog`; replaces the dead (no-onClick) `<button>` that was in the dashboard server component
+- Updated `src/app/(dashboard)/dashboard/page.tsx` — replaced the unwired `<button>` + `FolderPlus` import with `<NewCollectionButton />`
+- Build passes with no errors
 
 ### 2026-05-08 — Homepage
 
@@ -195,7 +194,7 @@ Result on mobile: `[☰] [kaystash] ············ [🔍] [★] [+]`
 - Added `CLAUDE.md` with project instructions and commands
 - Added `context/` directory (project overview, coding standards, AI interaction guidelines, current feature tracker)
 - Updated `README.md` to reflect KayStash project
-- Pushed to GitHub: https://github.com/riskymind/Kaystash.git
+- Pushed to GitHub: https://github.com/riskymind/Kaystach.git
 
 ### 2026-04-13 — Dashboard UI Phase 1
 - Initialized ShadCN UI (components.json, design tokens, globals.css updated)
