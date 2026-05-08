@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KayStash — Developer Knowledge Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon">⌨</span>
+        <span>kaystash</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-actions">
+        <a href="#" class="btn-ghost">Sign In</a>
+        <a href="#" class="btn-primary">Get Started</a>
+      </div>
+      <button class="nav-mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="nav-mobile-menu" id="mobileMenu">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Sign In</a>
+      <a href="#" class="btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="container">
+
+      <!-- Hero Text -->
+      <div class="hero-text fade-in">
+        <div class="hero-badge">Developer Knowledge Hub</div>
+        <h1 class="hero-headline">
+          Stop Losing Your<br>
+          <span class="gradient-text">Developer Knowledge</span>
+        </h1>
+        <p class="hero-subheadline">
+          Your snippets live in VS Code. Your best prompts are buried in chat histories.
+          Your links are scattered across bookmarks. KayStash brings it all into one
+          fast, searchable hub.
+        </p>
+        <div class="hero-ctas">
+          <a href="#" class="btn-primary btn-lg">Get Started Free</a>
+          <a href="#features" class="btn-ghost btn-lg">See Features</a>
+        </div>
+      </div>
+
+      <!-- Hero Visual: Chaos → Order -->
+      <div class="hero-visual fade-in">
+
+        <!-- Left: Chaos container -->
+        <div class="visual-box chaos-box">
+          <div class="visual-box-label">Your knowledge today...</div>
+          <div class="chaos-container" id="chaosContainer">
+
+            <!-- Notion -->
+            <div class="chaos-icon">
+              <div class="icon-badge notion-icon">N</div>
+            </div>
+
+            <!-- GitHub -->
+            <div class="chaos-icon">
+              <div class="icon-badge github-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                  <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Slack -->
+            <div class="chaos-icon">
+              <div class="icon-badge slack-icon">#</div>
+            </div>
+
+            <!-- VS Code -->
+            <div class="chaos-icon">
+              <div class="icon-badge vscode-icon">&lt;/&gt;</div>
+            </div>
+
+            <!-- Browser tabs -->
+            <div class="chaos-icon">
+              <div class="icon-badge browser-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Terminal -->
+            <div class="chaos-icon">
+              <div class="icon-badge terminal-icon">&gt;_</div>
+            </div>
+
+            <!-- Text file -->
+            <div class="chaos-icon">
+              <div class="icon-badge textfile-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Bookmark -->
+            <div class="chaos-icon">
+              <div class="icon-badge bookmark-icon">&#9733;</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Center: Arrow -->
+        <div class="transform-arrow">
+          <div class="arrow-icon">&#8594;</div>
+        </div>
+
+        <!-- Right: Dashboard preview -->
+        <div class="visual-box dashboard-box">
+          <div class="visual-box-label">...with KayStash</div>
+          <div class="dashboard-mockup">
+            <div class="dash-sidebar">
+              <div class="dash-nav-item active">
+                <span class="dash-dot" style="background:#3b82f6"></span>
+                <span>Snippets</span>
+              </div>
+              <div class="dash-nav-item">
+                <span class="dash-dot" style="background:#f59e0b"></span>
+                <span>Prompts</span>
+              </div>
+              <div class="dash-nav-item">
+                <span class="dash-dot" style="background:#06b6d4"></span>
+                <span>Commands</span>
+              </div>
+              <div class="dash-nav-item">
+                <span class="dash-dot" style="background:#22c55e"></span>
+                <span>Notes</span>
+              </div>
+              <div class="dash-nav-item">
+                <span class="dash-dot" style="background:#6366f1"></span>
+                <span>Links</span>
+              </div>
+            </div>
+            <div class="dash-content">
+              <div class="dash-card" style="border-top-color:#3b82f6">
+                <div class="dash-card-line"></div>
+                <div class="dash-card-line short"></div>
+              </div>
+              <div class="dash-card" style="border-top-color:#f59e0b">
+                <div class="dash-card-line"></div>
+                <div class="dash-card-line short"></div>
+              </div>
+              <div class="dash-card" style="border-top-color:#06b6d4">
+                <div class="dash-card-line"></div>
+                <div class="dash-card-line short"></div>
+              </div>
+              <div class="dash-card" style="border-top-color:#22c55e">
+                <div class="dash-card-line"></div>
+                <div class="dash-card-line short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Everything a developer needs,<br><span class="gradient-text">in one place</span></h2>
+        <p>Store, organize, and retrieve any kind of developer knowledge instantly.</p>
+      </div>
+      <div class="features-grid">
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+          </div>
+          <h3>Code Snippets</h3>
+          <p>Save reusable code with syntax highlighting. Organize by language, tags, and collections.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3>AI Prompts</h3>
+          <p>Build your personal prompt library. Save your best prompts with context and examples.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(99,102,241,0.12);color:#6366f1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <h3>Instant Search</h3>
+          <p>Find anything in milliseconds. Search across titles, content, tags, and type.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(6,182,212,0.12);color:#06b6d4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <polyline points="4 17 10 11 4 5"/>
+              <line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+          </div>
+          <h3>Commands</h3>
+          <p>Never forget a CLI command again. Store with descriptions and usage examples.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(100,116,139,0.12);color:#94a3b8">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <h3>Files &amp; Docs</h3>
+          <p>Upload context files, documentation, and reference materials. Available on Pro.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon" style="background:rgba(139,92,246,0.12);color:#8b5cf6">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <h3>Collections</h3>
+          <p>Group related items into collections. React patterns, AI workflows, DevOps toolkits.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Section -->
+  <section id="ai">
+    <div class="container">
+      <div class="ai-grid">
+
+        <div class="ai-text fade-in">
+          <div class="pro-badge">Pro Feature</div>
+          <h2>AI-powered knowledge management</h2>
+          <ul class="ai-checklist">
+            <li>
+              <span class="check-icon">&#10003;</span>
+              <div>
+                <strong>Auto-tagging</strong>
+                <p>AI analyzes your content and suggests relevant tags automatically.</p>
+              </div>
+            </li>
+            <li>
+              <span class="check-icon">&#10003;</span>
+              <div>
+                <strong>Code Explanation</strong>
+                <p>Paste any snippet and get a clear, concise explanation instantly.</p>
+              </div>
+            </li>
+            <li>
+              <span class="check-icon">&#10003;</span>
+              <div>
+                <strong>Prompt Optimizer</strong>
+                <p>Refine your AI prompts for better, more consistent results.</p>
+              </div>
+            </li>
+            <li>
+              <span class="check-icon">&#10003;</span>
+              <div>
+                <strong>Smart Summaries</strong>
+                <p>Generate concise summaries of long code blocks and documents.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="ai-demo fade-in">
+          <div class="code-editor-mockup">
+            <div class="editor-header">
+              <div class="editor-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="editor-lang">typescript</span>
+            </div>
+            <div class="editor-body">
+              <pre class="editor-code"><span class="kw">const</span> useAuth = () =&gt; {
+  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="kw">const</span> login = <span class="kw">async</span> (credentials) =&gt; {
+    <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/auth'</span>, {
+      method: <span class="str">'POST'</span>,
+      body: <span class="fn">JSON.stringify</span>(credentials),
+    });
+    <span class="fn">setUser</span>(<span class="kw">await</span> res.<span class="fn">json</span>());
+  };
+
+  <span class="kw">return</span> { user, login };
+};</pre>
+            </div>
+            <div class="ai-tags-demo">
+              <span class="ai-tags-label">&#10024; AI Generated Tags</span>
+              <div class="ai-tag-chips">
+                <span class="tag-chip">react</span>
+                <span class="tag-chip">hooks</span>
+                <span class="tag-chip">authentication</span>
+                <span class="tag-chip">typescript</span>
+                <span class="tag-chip">api</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h2>Simple, transparent <span class="gradient-text">pricing</span></h2>
+        <p>Start free, upgrade when you need more.</p>
+      </div>
+
+      <div class="pricing-toggle fade-in">
+        <span class="toggle-label" id="monthlyLabel">Monthly</span>
+        <button class="toggle-btn" id="pricingToggle" aria-label="Toggle yearly billing">
+          <span class="toggle-thumb"></span>
+        </button>
+        <span class="toggle-label" id="yearlyLabel">
+          Yearly
+          <span class="save-badge">Save 25%</span>
+        </span>
+      </div>
+
+      <div class="pricing-grid fade-in">
+
+        <!-- Free -->
+        <div class="pricing-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">
+            <span class="price-amount">$0</span>
+            <span class="price-period">/ month</span>
+          </div>
+          <p class="plan-desc">Perfect for getting started</p>
+          <a href="#" class="btn-outline btn-full">Get Started Free</a>
+          <ul class="plan-features">
+            <li><span class="feat-check">&#10003;</span> 50 items total</li>
+            <li><span class="feat-check">&#10003;</span> 3 collections</li>
+            <li><span class="feat-check">&#10003;</span> Snippets, Prompts, Commands, Notes, Links</li>
+            <li><span class="feat-check">&#10003;</span> Basic search</li>
+            <li><span class="feat-x">&#10007;</span> File &amp; image uploads</li>
+            <li><span class="feat-x">&#10007;</span> AI features</li>
+            <li><span class="feat-x">&#10007;</span> Data export</li>
+          </ul>
+        </div>
+
+        <!-- Pro -->
+        <div class="pricing-card featured">
+          <div class="most-popular">Most Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">
+            <span class="price-amount" id="proPrice">$8</span>
+            <span class="price-period">/ month</span>
+          </div>
+          <p class="plan-desc" id="proDesc">Billed monthly</p>
+          <a href="#" class="btn-primary btn-full">Get Started</a>
+          <ul class="plan-features">
+            <li><span class="feat-check">&#10003;</span> Unlimited items</li>
+            <li><span class="feat-check">&#10003;</span> Unlimited collections</li>
+            <li><span class="feat-check">&#10003;</span> All item types incl. files &amp; images</li>
+            <li><span class="feat-check">&#10003;</span> Instant search</li>
+            <li><span class="feat-check">&#10003;</span> AI auto-tagging</li>
+            <li><span class="feat-check">&#10003;</span> AI code explanation</li>
+            <li><span class="feat-check">&#10003;</span> AI prompt optimizer</li>
+            <li><span class="feat-check">&#10003;</span> Data export (JSON / ZIP)</li>
+            <li><span class="feat-check">&#10003;</span> Priority support</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="cta">
+    <div class="container">
+      <div class="cta-box fade-in">
+        <h2>Ready to organize your knowledge?</h2>
+        <p>Join developers who've stopped losing their best work.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn-primary btn-lg">Start for Free</a>
+          <a href="#" class="btn-ghost btn-lg">View Demo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <span class="logo-icon">⌨</span>
+            <span>kaystash</span>
+          </a>
+          <p>The developer knowledge hub.<br>Store everything. Find anything.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Product</h4>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#">Changelog</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Contact</a>
+          </div>
+          <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; <span id="currentYear"></span> KayStash. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
