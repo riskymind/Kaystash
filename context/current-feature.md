@@ -1,15 +1,31 @@
-# Current Feature
+# Current Feature: Homepage
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Replace `app/page.tsx` root route with a public marketing homepage (no auth required)
+- Implement all 7 sections: Navbar, Hero, Features, AI Section, Pricing, CTA, Footer
+- Split into server/client components per spec: `NavbarClient`, `ChaosAnimation`, `PricingToggle` as `'use client'`; rest as server components
+- `ChaosAnimation`: rAF bounce + mouse repulsion + visibilitychange pause, 8 icon badges
+- `PricingToggle`: monthly/yearly state, correct prices ($8/mo vs $6/mo billed $72/yr)
+- `FeaturesSection`: 6-card responsive grid with Lucide icons; Files & Docs marked "Available on Pro"
+- `AISection`: two-column layout, Pro badge, checklist, static code editor mockup
+- Scroll fade-in via `IntersectionObserver` in a `ScrollReveal.tsx` `'use client'` wrapper
+- All nav/CTA links wired to correct routes; anchor links (`#features`, `#pricing`) on section wrappers
+- Dark `bg-[#080810]` / `bg-zinc-950` background; gradient text; shadcn `Button` + `Badge`
+- Build passes with no errors; page renders correctly in browser
 
 ## Notes
 
-<!-- Add notes here -->
+- Prototype lives in `prototypes/homepage/` — use as visual reference
+- File structure: `src/components/marketing/` for all section components
+- No `tailwind.config.ts` — custom tokens go in `globals.css` via `@theme` (Tailwind v4)
+- Footer year via `new Date().getFullYear()` (server component)
+- Static code editor mockup in AISection — no Monaco
+- shadcn `Badge` for "Pro Feature" and "Most Popular" labels
+- Keep section `id` attributes on outermost `<section>` tag for anchor scroll
 
 <!-- Keep this updated. Earliest to latest -->
 
