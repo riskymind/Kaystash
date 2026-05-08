@@ -1,54 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Editor, { OnMount, loader } from '@monaco-editor/react';
 import { Copy, Check } from 'lucide-react';
 import { useEditorPreferences } from '@/contexts/EditorPreferencesContext';
-
-// Register monokai and github-dark themes on first load
-loader.init().then((monaco) => {
-  monaco.editor.defineTheme('monokai', {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [
-      { token: 'comment', foreground: '75715e', fontStyle: 'italic' },
-      { token: 'keyword', foreground: 'f92672' },
-      { token: 'string', foreground: 'e6db74' },
-      { token: 'number', foreground: 'ae81ff' },
-      { token: 'type', foreground: '66d9ef', fontStyle: 'italic' },
-      { token: 'function', foreground: 'a6e22e' },
-      { token: 'variable', foreground: 'f8f8f2' },
-    ],
-    colors: {
-      'editor.background': '#272822',
-      'editor.foreground': '#f8f8f2',
-      'editor.lineHighlightBackground': '#3e3d32',
-      'editorLineNumber.foreground': '#75715e',
-      'editor.selectionBackground': '#49483e',
-    },
-  });
-
-  monaco.editor.defineTheme('github-dark', {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [
-      { token: 'comment', foreground: '8b949e', fontStyle: 'italic' },
-      { token: 'keyword', foreground: 'ff7b72' },
-      { token: 'string', foreground: 'a5d6ff' },
-      { token: 'number', foreground: '79c0ff' },
-      { token: 'type', foreground: 'ffa657' },
-      { token: 'function', foreground: 'd2a8ff' },
-      { token: 'variable', foreground: 'e6edf3' },
-    ],
-    colors: {
-      'editor.background': '#0d1117',
-      'editor.foreground': '#e6edf3',
-      'editor.lineHighlightBackground': '#161b22',
-      'editorLineNumber.foreground': '#6e7681',
-      'editor.selectionBackground': '#264f78',
-    },
-  });
-});
 
 interface CodeEditorProps {
   value: string;
@@ -64,6 +19,52 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
   const [copied, setCopied] = useState(false);
   const [editorHeight, setEditorHeight] = useState(MIN_HEIGHT);
   const { preferences } = useEditorPreferences();
+
+  useEffect(() => {
+    loader.init().then((monaco) => {
+      monaco.editor.defineTheme('monokai', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'comment', foreground: '75715e', fontStyle: 'italic' },
+          { token: 'keyword', foreground: 'f92672' },
+          { token: 'string', foreground: 'e6db74' },
+          { token: 'number', foreground: 'ae81ff' },
+          { token: 'type', foreground: '66d9ef', fontStyle: 'italic' },
+          { token: 'function', foreground: 'a6e22e' },
+          { token: 'variable', foreground: 'f8f8f2' },
+        ],
+        colors: {
+          'editor.background': '#272822',
+          'editor.foreground': '#f8f8f2',
+          'editor.lineHighlightBackground': '#3e3d32',
+          'editorLineNumber.foreground': '#75715e',
+          'editor.selectionBackground': '#49483e',
+        },
+      });
+
+      monaco.editor.defineTheme('github-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'comment', foreground: '8b949e', fontStyle: 'italic' },
+          { token: 'keyword', foreground: 'ff7b72' },
+          { token: 'string', foreground: 'a5d6ff' },
+          { token: 'number', foreground: '79c0ff' },
+          { token: 'type', foreground: 'ffa657' },
+          { token: 'function', foreground: 'd2a8ff' },
+          { token: 'variable', foreground: 'e6edf3' },
+        ],
+        colors: {
+          'editor.background': '#0d1117',
+          'editor.foreground': '#e6edf3',
+          'editor.lineHighlightBackground': '#161b22',
+          'editorLineNumber.foreground': '#6e7681',
+          'editor.selectionBackground': '#264f78',
+        },
+      });
+    });
+  }, []);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(value);
