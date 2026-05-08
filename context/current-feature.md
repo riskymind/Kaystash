@@ -1,15 +1,21 @@
-# Current Feature
+# Current Feature: Auth Pages Navbar
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add the homepage navbar to the sign-in and register pages
+- Strip the Features and Pricing scroll-buttons from the navbar on auth pages (those are landing-page-only anchors)
+- Keep the logo (links to `/`), Sign In button, and Get Started button
+- Navbar should sit at the top; auth card remains centered in the remaining viewport height
 
 ## Notes
 
-<!-- Add notes here -->
+- `NavbarClient` owns all the nav logic; add a `showNavLinks?: boolean` prop (default `true`) — when `false`, the Features/Pricing buttons are hidden in both desktop and mobile menus
+- Update `Navbar` server wrapper to accept and forward the same prop
+- Update `src/app/(auth)/layout.tsx` to render `<Navbar showNavLinks={false} />` above the centered content area, and adjust layout so the card is centered in the space below the 64 px navbar (use `pt-16 min-h-screen` on the outer wrapper, keep `flex-1 flex items-center justify-center` on the inner area)
+- No new component files needed — prop extension is enough
 
 ## History
 

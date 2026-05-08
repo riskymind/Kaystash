@@ -9,7 +9,7 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 }
 
-export default function NavbarClient() {
+export default function NavbarClient({ showNavLinks = true }: { showNavLinks?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -37,14 +37,16 @@ export default function NavbarClient() {
           <span>kaystash</span>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-8">
-          <button onClick={() => scrollTo('features')} className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer">
-            Features
-          </button>
-          <button onClick={() => scrollTo('pricing')} className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer">
-            Pricing
-          </button>
-        </div>
+        {showNavLinks && (
+          <div className="hidden lg:flex items-center gap-8">
+            <button onClick={() => scrollTo('features')} className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer">
+              Features
+            </button>
+            <button onClick={() => scrollTo('pricing')} className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer">
+              Pricing
+            </button>
+          </div>
+        )}
 
         <div className="hidden lg:flex items-center gap-3">
           <Link
@@ -82,18 +84,22 @@ export default function NavbarClient() {
 
       {mobileOpen && (
         <div className="lg:hidden bg-zinc-950/95 backdrop-blur-md border-b border-white/5 px-4 pb-4 flex flex-col gap-3">
-          <button
-            className="text-sm text-zinc-400 hover:text-white py-2 transition-colors text-left cursor-pointer"
-            onClick={() => { scrollTo('features'); setMobileOpen(false); }}
-          >
-            Features
-          </button>
-          <button
-            className="text-sm text-zinc-400 hover:text-white py-2 transition-colors text-left cursor-pointer"
-            onClick={() => { scrollTo('pricing'); setMobileOpen(false); }}
-          >
-            Pricing
-          </button>
+          {showNavLinks && (
+            <>
+              <button
+                className="text-sm text-zinc-400 hover:text-white py-2 transition-colors text-left cursor-pointer"
+                onClick={() => { scrollTo('features'); setMobileOpen(false); }}
+              >
+                Features
+              </button>
+              <button
+                className="text-sm text-zinc-400 hover:text-white py-2 transition-colors text-left cursor-pointer"
+                onClick={() => { scrollTo('pricing'); setMobileOpen(false); }}
+              >
+                Pricing
+              </button>
+            </>
+          )}
           <Link
             href="/sign-in"
             className="text-sm text-zinc-400 hover:text-white py-2 transition-colors"
