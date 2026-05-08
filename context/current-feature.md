@@ -1,35 +1,34 @@
-# Current Feature: Homepage
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Replace `app/page.tsx` root route with a public marketing homepage (no auth required)
-- Implement all 7 sections: Navbar, Hero, Features, AI Section, Pricing, CTA, Footer
-- Split into server/client components per spec: `NavbarClient`, `ChaosAnimation`, `PricingToggle` as `'use client'`; rest as server components
-- `ChaosAnimation`: rAF bounce + mouse repulsion + visibilitychange pause, 8 icon badges
-- `PricingToggle`: monthly/yearly state, correct prices ($8/mo vs $6/mo billed $72/yr)
-- `FeaturesSection`: 6-card responsive grid with Lucide icons; Files & Docs marked "Available on Pro"
-- `AISection`: two-column layout, Pro badge, checklist, static code editor mockup
-- Scroll fade-in via `IntersectionObserver` in a `ScrollReveal.tsx` `'use client'` wrapper
-- All nav/CTA links wired to correct routes; anchor links (`#features`, `#pricing`) on section wrappers
-- Dark `bg-[#080810]` / `bg-zinc-950` background; gradient text; shadcn `Button` + `Badge`
-- Build passes with no errors; page renders correctly in browser
+<!-- List goals here -->
 
 ## Notes
 
-- Prototype lives in `prototypes/homepage/` — use as visual reference
-- File structure: `src/components/marketing/` for all section components
-- No `tailwind.config.ts` — custom tokens go in `globals.css` via `@theme` (Tailwind v4)
-- Footer year via `new Date().getFullYear()` (server component)
-- Static code editor mockup in AISection — no Monaco
-- shadcn `Badge` for "Pro Feature" and "Most Popular" labels
-- Keep section `id` attributes on outermost `<section>` tag for anchor scroll
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-08 — Homepage
+
+- Created `src/app/page.tsx` — public server component; composes all 7 marketing sections in order; no auth check
+- Created `src/components/marketing/Navbar.tsx` + `NavbarClient.tsx` — fixed navbar with `backdrop-blur` on scroll >24px; `scrollIntoView` smooth scroll for Features/Pricing buttons; logo click scrolls to top; mobile hamburger toggles dropdown menu
+- Created `src/components/marketing/HeroSection.tsx` — two-column layout; headline with gradient text; "Get Started Free" → `/register`, "See Features" → `#features`; chaos visual and static dashboard mockup side by side
+- Created `src/components/marketing/ChaosAnimation.tsx` (`'use client'`) — 8 icon badges (Notion, GitHub, Slack, VS Code, Browser, Terminal, File, Bookmark) bounce inside container via `requestAnimationFrame`; wall bounce + velocity damping + min-speed kick; mouse repulsion via `mousemove`; pauses on `visibilitychange`; inline `style` transforms only
+- Created `src/components/marketing/ScrollReveal.tsx` (`'use client'`) — `IntersectionObserver` wrapper that adds `.visible` class on entry; used on every section for fade-in animation
+- Created `src/components/marketing/FeaturesSection.tsx` — 6-card responsive grid (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`); Lucide icons (`Code2`, `Sparkles`, `Search`, `Terminal`, `File`, `LayoutGrid`); Files & Docs card marked "(Pro)"
+- Created `src/components/marketing/AISection.tsx` — two-column layout; shadcn `Badge` "Pro Feature"; 4-item checklist with check icons; static code editor mockup with macOS chrome, syntax-highlighted TypeScript, AI tag chips
+- Created `src/components/marketing/PricingSection.tsx` + `PricingToggle.tsx` (`'use client'`) — monthly/yearly toggle; monthly: Pro $8/mo; yearly: Pro $6/mo "Billed $72 / year"; Free card unchanged; shadcn `Badge` "Most Popular" on Pro card; both CTAs → `/register`
+- Created `src/components/marketing/CTASection.tsx` — centered conversion box; "Start for Free" → `/register`, "View Demo" → `/sign-in`
+- Created `src/components/marketing/Footer.tsx` — 4-column grid (brand + Product / Company / Legal); dynamic year via `new Date().getFullYear()`; placeholder `#` links for Changelog, About, Blog, Contact, Privacy, Terms
+- Updated `src/app/globals.css` — added `html { scroll-behavior: smooth }` for anchor scrolling; added `.fade-in` / `.fade-in.visible` CSS for `ScrollReveal`
+- Build passes with no errors
 
 ### 2026-05-08 — Homepage Mockup
 
