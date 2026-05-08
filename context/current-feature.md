@@ -1,32 +1,29 @@
-# Current Feature — Homepage Mockup
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Create a standalone marketing homepage at `prototypes/homepage/` (`index.html`, `styles.css`, `script.js`)
-- Hero section shows "chaos to order" concept: floating icons (Notion, GitHub, Slack, VS Code, etc.) on the left, pulsing arrow in the center, simplified dashboard preview on the right
-- Chaos icons animate via `requestAnimationFrame` — drift, bounce off walls, repel from mouse cursor
-- Navigation: fixed top nav with logo, Features/Pricing links, Sign In/Get Started buttons; becomes more opaque on scroll
-- Hero text: gradient headline, subheadline, CTA buttons
-- Features section: 6 cards (Code Snippets, AI Prompts, Instant Search, Commands, Files & Docs, Collections) using item type accent colors
-- AI section: two columns — Pro Feature checklist left, code editor mockup with AI tag demo right
-- Pricing section: Free ($0) vs Pro ($8/mo or $72/yr toggle); Pro card highlighted with "Most Popular" badge
-- CTA section and footer with logo, link columns, and current-year copyright
-- Scroll fade-in animations for sections
-- Responsive: chaos/arrow/dashboard stack vertically on mobile; arrow rotates 90° pointing down
+<!-- List goals here -->
 
 ## Notes
 
-- **Output directory**: `prototypes/homepage/` — three files only (`index.html`, `styles.css`, `script.js`), no build tools
-- Dark theme; item type accent colors: Snippet `#3b82f6`, Prompt `#f59e0b`, Command `#06b6d4`, Note `#22c55e`, File `#64748b`, Image `#ec4899`, URL `#6366f1`
-- Chaos container icons: Notion, GitHub, Slack, VS Code logos + browser tabs, Terminal, Text file, Bookmark icons (SVG or unicode/emoji stand-ins)
-- Dashboard preview is a static mockup — sidebar nav + grid of colored cards, no real interactivity
+<!-- Add notes here -->
 
 <!-- Keep this updated. Earliest to latest -->
 
 ## History
+
+### 2026-05-08 — Homepage Mockup
+
+- Created `prototypes/homepage/index.html` — full marketing page: fixed navbar, hero (chaos-to-order visual + headline + CTA), 6-card features grid, AI section, pricing, CTA, footer
+- Created `prototypes/homepage/styles.css` — dark theme (`#080810`), item type accent colors, responsive at 3 breakpoints (mobile / tablet / desktop), all animation styles
+- Created `prototypes/homepage/script.js` — 4 behaviors: (1) `requestAnimationFrame` chaos icon animation with wall bounce and mouse repulsion, pauses when tab hidden; (2) navbar opacity on scroll; (3) `IntersectionObserver` scroll fade-in; (4) monthly/yearly pricing toggle ($8 → $6/mo, "Billed $72/year")
+- Hero chaos container: 8 styled icon badges (Notion, GitHub, Slack, VS Code, Browser, Terminal, Text file, Bookmark) drift and bounce inside the box, repel from cursor on hover
+- Dashboard preview: static mockup with mini sidebar (colored dots + type labels) and 2×2 card grid with colored top borders
+- Arrow between chaos and dashboard: CSS opacity pulse; rotates 90° on mobile to point down
+- No build tools — three vanilla files, opens directly in the browser
 
 ### 2026-05-06 — Pinned Items
 
