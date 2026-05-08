@@ -1,23 +1,25 @@
-# Current Feature: Auth Pages Navbar
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add the homepage navbar to the sign-in and register pages
-- Strip the Features and Pricing scroll-buttons from the navbar on auth pages (those are landing-page-only anchors)
-- Keep the logo (links to `/`), Sign In button, and Get Started button
-- Navbar should sit at the top; auth card remains centered in the remaining viewport height
+<!-- List goals here -->
 
 ## Notes
 
-- `NavbarClient` owns all the nav logic; add a `showNavLinks?: boolean` prop (default `true`) — when `false`, the Features/Pricing buttons are hidden in both desktop and mobile menus
-- Update `Navbar` server wrapper to accept and forward the same prop
-- Update `src/app/(auth)/layout.tsx` to render `<Navbar showNavLinks={false} />` above the centered content area, and adjust layout so the card is centered in the space below the 64 px navbar (use `pt-16 min-h-screen` on the outer wrapper, keep `flex-1 flex items-center justify-center` on the inner area)
-- No new component files needed — prop extension is enough
+<!-- Add notes here -->
 
 ## History
+
+### 2026-05-08 — Auth Pages Navbar
+
+- Updated `src/components/marketing/NavbarClient.tsx` — added `showNavLinks?: boolean` prop (default `true`); when `false`, Features and Pricing scroll-buttons are hidden in both desktop nav and mobile dropdown menu
+- Updated `src/components/marketing/Navbar.tsx` — accepts and forwards `showNavLinks` prop to `NavbarClient`
+- Updated `src/app/(auth)/layout.tsx` — renders `<Navbar showNavLinks={false} />` at the top; outer wrapper is `min-h-screen bg-background`; inner area is `pt-16 min-h-[calc(100vh-64px)] flex items-center justify-center px-4` so the auth card is centered in the space below the 64px navbar
+- No new component files; applies to `/sign-in`, `/register`, `/forgot-password`, `/reset-password`, and `/verify-email-sent` (all routes under the `(auth)` layout)
+- Build passes with no errors
 
 ### 2026-05-08 — Mobile Topbar Declutter + Fixes
 
