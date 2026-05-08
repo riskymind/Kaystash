@@ -83,7 +83,8 @@ export function DashboardShell({
           <Link href="/dashboard" className="text-sm font-semibold tracking-tight">kaystash</Link>
         </div>
 
-        <div className="flex items-center flex-1 max-w-sm mx-6">
+        {/* Desktop search bar — hidden on mobile */}
+        <div className="hidden lg:flex items-center flex-1 max-w-sm mx-6">
           <button
             type="button"
             className="relative w-full flex items-center h-8 rounded-md bg-muted/50 border border-border px-2.5 text-sm text-muted-foreground cursor-pointer hover:bg-muted/70 transition-colors"
@@ -97,7 +98,17 @@ export function DashboardShell({
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
+          {/* Mobile search icon — hidden on desktop */}
+          <button
+            type="button"
+            aria-label="Search"
+            className="lg:hidden inline-flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            onClick={() => setPaletteOpen(true)}
+          >
+            <Search className="size-4" />
+          </button>
+
           <Link
             href="/favorites"
             aria-label="Favorites"
@@ -105,13 +116,17 @@ export function DashboardShell({
           >
             <Star className="size-4" />
           </Link>
-          <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setNewCollectionOpen(true)}>
+
+          {/* New Collection — hidden on mobile */}
+          <Button size="sm" variant="outline" className="hidden lg:flex gap-1.5 h-8 text-xs" onClick={() => setNewCollectionOpen(true)}>
             <Plus className="size-3.5" />
             New Collection
           </Button>
+
+          {/* New Item — icon only on mobile, with label on desktop */}
           <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setNewItemOpen(true)}>
             <Plus className="size-3.5" />
-            New Item
+            <span className="hidden lg:inline">New Item</span>
           </Button>
         </div>
         <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} collections={sidebarCollections} />

@@ -3,7 +3,6 @@ import {
   Pin,
   Box,
   FolderOpen,
-  FolderPlus,
   Heart,
   Bookmark,
 } from 'lucide-react';
@@ -13,6 +12,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { ItemRowsWithDrawer } from '@/components/items/ItemRowsWithDrawer';
 import { CollectionCardWithMenu } from '@/components/collections/CollectionCardWithMenu';
+import { NewCollectionButton } from '@/components/collections/NewCollectionButton';
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -76,10 +76,7 @@ export default async function DashboardPage() {
             <Link href="/collections" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
               View all
             </Link>
-            <button className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
-              <FolderPlus className="size-3.5" />
-              New Collection
-            </button>
+            <NewCollectionButton />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

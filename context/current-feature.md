@@ -1,17 +1,24 @@
 # Current Feature
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+Declutter the dashboard top bar on small screens (< lg / < 1024px) using icon-only collapse:
+
+- **Search bar**: hide the full pill input on mobile; show a `🔍` icon button instead that opens the command palette
+- **New Collection**: hide from topbar on mobile (accessible via sidebar drawer)
+- **New Item**: show only the `+` icon on mobile, hide the label text
+- **Favorites star**: unchanged (already icon-only)
+
+Result on mobile: `[☰] [kaystash] ············ [🔍] [★] [+]`
 
 ## Notes
 
-<!-- Add notes here -->
-
-<!-- Keep this updated. Earliest to latest -->
+- All changes are in `src/components/layout/DashboardShell.tsx` only
+- No new components needed
+- Uses responsive Tailwind classes (`hidden lg:flex`, `hidden lg:inline`, `lg:hidden`)
 
 ## History
 
@@ -184,7 +191,7 @@ Not Started
 
 ### 2026-04-13 — Initial Next.js Setup
 - Bootstrapped project with `create-next-app` (Next.js 16, React 19, TypeScript, Tailwind CSS v4)
-- Removed default Next.js boilerplate (page, styles, public assets)
+- Removed default Next.js boilerplate (page, styles, default styles, public assets)
 - Added `CLAUDE.md` with project instructions and commands
 - Added `context/` directory (project overview, coding standards, AI interaction guidelines, current feature tracker)
 - Updated `README.md` to reflect KayStash project
