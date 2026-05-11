@@ -35,31 +35,39 @@ export default function PricingToggle() {
   return (
     <div>
       <div className="flex items-center justify-center gap-4 mb-12">
-        <span className={`text-sm ${!yearly ? 'text-white' : 'text-zinc-500'}`}>Monthly</span>
+        <button
+          onClick={() => setYearly(false)}
+          className={`text-sm cursor-pointer ${!yearly ? 'text-white font-medium' : 'text-zinc-500'}`}
+        >
+          Monthly
+        </button>
         <button
           onClick={() => setYearly((v) => !v)}
-          className="relative w-12 h-6 rounded-full bg-zinc-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+          className="relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+          style={{ backgroundColor: yearly ? '#7c3aed' : '#3f3f46' }}
           aria-label="Toggle yearly billing"
         >
           <span
-            className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-              yearly ? 'translate-x-7' : 'translate-x-1'
-            }`}
+            className="absolute top-1 w-4 h-4 rounded-full bg-white transition-transform duration-200"
+            style={{ transform: yearly ? 'translateX(1.75rem)' : 'translateX(0.25rem)' }}
           />
         </button>
-        <span className={`text-sm flex items-center gap-2 ${yearly ? 'text-white' : 'text-zinc-500'}`}>
+        <button
+          onClick={() => setYearly(true)}
+          className={`text-sm flex items-center gap-2 cursor-pointer ${yearly ? 'text-white font-medium' : 'text-zinc-500'}`}
+        >
           Yearly
           <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/20">
-            Save 25%
+            Save 17%
           </span>
-        </span>
+        </button>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
         <div className="rounded-xl border border-white/5 bg-white/2 p-8">
           <div className="text-zinc-400 text-sm font-medium mb-4">Free</div>
           <div className="flex items-end gap-1 mb-2">
-            <span className="text-4xl font-bold text-white">$0</span>
+            <span className="text-4xl font-bold text-white">₦0</span>
             <span className="text-zinc-500 mb-1">/ month</span>
           </div>
           <p className="text-zinc-500 text-sm mb-6">Perfect for getting started</p>
@@ -89,11 +97,11 @@ export default function PricingToggle() {
           </Badge>
           <div className="text-white text-sm font-medium mb-4">Pro</div>
           <div className="flex items-end gap-1 mb-2">
-            <span className="text-4xl font-bold text-white">{yearly ? '$6' : '$8'}</span>
+            <span className="text-4xl font-bold text-white">{yearly ? '₦833' : '₦1,000'}</span>
             <span className="text-zinc-500 mb-1">/ month</span>
           </div>
           <p className="text-zinc-500 text-sm mb-6">
-            {yearly ? 'Billed $72 / year' : 'Billed monthly'}
+            {yearly ? 'Billed ₦10,000 / year' : 'Billed monthly'}
           </p>
           <Link
             href="/register"
