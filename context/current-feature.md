@@ -1,28 +1,30 @@
-# Current Feature: Stripe Integration — Phase 1: Core Infrastructure
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Install `stripe` npm package
-- Add all five Stripe env vars to `.env` and `.env.example`
-- Create Stripe client singleton at `src/lib/stripe.ts`
-- Extend NextAuth session so `isPro` is available in `session.user` (via `jwt` + `session` callbacks)
-- Create `src/lib/db/subscription.ts` with `handleSubscriptionActivated` and `handleSubscriptionCancelled` helpers
-- Write Vitest unit tests for the subscription DB helpers (3 tests covering activate, cancel, unknown customer)
-- All tests pass and build has no TypeScript errors
+<!-- List goals here -->
 
 ## Notes
 
-- No API routes or UI in this phase — foundation only
-- The `jwt` callback must always query DB for `isPro` so a page reload after checkout reflects pro status without needing to invalidate the JWT manually
-- `src/lib/stripe.ts` uses API version `2024-12-18.acacia`
-- Subscription helpers use `updateMany` with ownership via `stripeCustomerId` — no throw on zero matches
-- Tests mock `@/lib/prisma` with `vi.mock`; `updateMany` returns `{ count: 1 }` by default
-- Env vars needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+<!-- Add notes here -->
 
 ## History
+
+### 2026-05-11 — Stripe Integration Phase 1: Core Infrastructure
+
+- Installed `stripe` v22.1.1
+- Updated `.env` and `.env.example` — renamed `STRIPE_PUBLISHABLE_KEY` → `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_PRICE_ID_MONTHLY` → `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ID_YEARLY` → `STRIPE_PRICE_YEARLY` to match spec naming
+- Created `src/lib/stripe.ts` — Stripe singleton using API version `2026-04-22.dahlia`
+- Updated `src/types/next-auth.d.ts` — added `isPro: boolean` to `Session` interface; added `isPro?: boolean` to `JWT` interface via `next-auth/jwt` module augmentation
+- Updated `src/auth.ts` — added `jwt` callback that queries DB on every token refresh to sync `isPro`; updated `session` callback to forward `isPro` to `session.user`
+- Created `src/lib/db/subscription.ts` — `handleSubscriptionActivated` (sets `isPro: true`, saves `stripeSubscriptionId`) and `handleSubscriptionCancelled` (sets `isPro: false`, clears `stripeSubscriptionId`); both use `updateMany` via `stripeCustomerId`
+- Created `src/lib/db/subscription.test.ts` — 4 Vitest tests covering activate sets correct data, cancel sets correct data, and both are no-throw when customer not found
+- Created `vitest.config.ts` — Vitest config with `vite-tsconfig-paths` for `@/` path aliases; node environment
+- Added `test` and `test:watch` scripts to `package.json`
+- All 4 tests pass; build passes with no TypeScript errors
 
 ### 2026-05-08 — Auth Pages Navbar
 
