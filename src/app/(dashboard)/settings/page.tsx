@@ -4,6 +4,7 @@ import { getProfileUser } from '@/lib/db/profile';
 import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm';
 import { DeleteAccountDialog } from '@/components/profile/DeleteAccountDialog';
 import { EditorPreferencesForm } from '@/components/settings/EditorPreferencesForm';
+import { BillingSection } from '@/components/settings/BillingSection';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -18,6 +19,19 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-semibold">Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your account settings</p>
       </div>
+
+      <section className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold">Billing</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage your subscription.</p>
+        </div>
+        <BillingSection
+          isPro={session.user.isPro}
+          hasStripeCustomer={!!user.stripeCustomerId}
+          monthlyPriceId={process.env.STRIPE_PRICE_MONTHLY!}
+          yearlyPriceId={process.env.STRIPE_PRICE_YEARLY!}
+        />
+      </section>
 
       <section className="rounded-lg border border-border bg-card p-5 space-y-4">
         <div>

@@ -71,6 +71,24 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
 
   const { type, title, description, content, url, language, tags } = parsed.data;
 
+  if (!session.user.isPro) {
+    const itemCount = await prisma.item.count({ where: { userId: session.user.id } });
+    if (itemCount >= 50) {
+      return {
+        success: false,
+        error: 'You have reached the 50-item limit on the free plan. Upgrade to Pro for unlimited items.',
+      };
+    }
+  }
+
+  const PRO_ONLY_TYPES = ['file', 'image'];
+  if (!session.user.isPro && PRO_ONLY_TYPES.includes(type)) {
+    return {
+      success: false,
+      error: 'File and Image uploads are a Pro feature. Upgrade to unlock.',
+    };
+  }
+
   const itemType = await prisma.itemType.findFirst({
     where: { name: type, isSystem: true },
     select: { id: true },

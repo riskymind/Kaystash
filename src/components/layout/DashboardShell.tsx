@@ -22,6 +22,7 @@ interface DashboardShellProps {
     name: string | null | undefined;
     email: string | null | undefined;
     image: string | null | undefined;
+    isPro: boolean;
   };
 }
 

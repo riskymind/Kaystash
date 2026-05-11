@@ -1,15 +1,54 @@
-# Current Feature
+# Current Feature: Stripe Integration Phase 2 — Webhooks, Gating & Billing UI
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Checkout session API route (`POST /api/stripe/checkout-session`) — creates or reuses a Stripe Customer, starts a subscription checkout, returns the hosted URL
+- Customer portal API route (`POST /api/stripe/create-portal-session`) — opens Stripe-hosted billing portal for existing subscribers
+- Webhook handler (`POST /api/webhooks/stripe`) — verifies signature, dispatches checkout/subscription/invoice events to Phase 1 DB helpers
+- Free-tier enforcement in `createItemAction` — 50-item limit, block file/image types for non-Pro users
+- Free-tier enforcement in `createCollectionAction` — 3-collection limit for non-Pro users
+- `BillingSection` client component — Free plan shows upgrade cards (Monthly ₦1,000/mo, Annual ₦10,000/yr); Pro plan shows manage subscription button
+- Settings page integration — Billing section above Editor Preferences, reads `stripeCustomerId` from DB
+- Pass `isPro` through dashboard layout → `DashboardShell`
 
 ## Notes
 
-<!-- Add notes here -->
+### Prerequisites
+- Phase 1 complete (`stripe` installed, `isPro` in session, DB helpers ready) ✅
+- Stripe Dashboard: product + two prices created (test mode), webhook endpoint registered
+- Stripe CLI installed locally for local webhook testing
+
+### Key implementation details
+- Checkout route: look up or create Stripe Customer, save `stripeCustomerId` to DB, redirect URLs to `/settings?billing=success` and `/settings?billing=cancelled`
+- Webhook: read raw body with `req.text()` (no Next.js body parsing), verify signature with `stripe.webhooks.constructEvent`
+- Webhook event dispatch: `checkout.session.completed` (mode=subscription) → activate; `customer.subscription.updated` (status=active) → activate, other status → cancel; `customer.subscription.deleted` → cancel; `invoice.payment_failed` → cancel
+- `BillingSection` receives price IDs as server-rendered props from settings page (not NEXT_PUBLIC vars)
+- `getProfileUser` needs `stripeCustomerId` added to its select and `ProfileUser` type
+- Free-tier guards go after auth check, before DB call in each action
+
+### Files to create
+- `src/app/api/stripe/checkout-session/route.ts`
+- `src/app/api/stripe/create-portal-session/route.ts`
+- `src/app/api/webhooks/stripe/route.ts`
+- `src/components/settings/BillingSection.tsx`
+
+### Files to modify
+- `src/actions/items.ts` — 50-item + file/image guards
+- `src/actions/collections.ts` — 3-collection guard
+- `src/lib/db/profile.ts` — add `stripeCustomerId` to select + type
+- `src/app/(dashboard)/settings/page.tsx` — add Billing section
+- `src/app/(dashboard)/layout.tsx` — include `isPro` in user object
+- `src/components/layout/DashboardShell.tsx` — accept `isPro` prop
+
+### Local webhook testing
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe trigger checkout.session.completed
+```
+The CLI prints a signing secret — use it as `STRIPE_WEBHOOK_SECRET` in `.env` (different from Dashboard secret)
 
 ## History
 

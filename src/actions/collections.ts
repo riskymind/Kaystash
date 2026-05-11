@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { auth } from '@/auth';
 import { createCollectionInDb, updateCollectionInDb, deleteCollectionInDb, toggleCollectionFavoriteInDb } from '@/lib/db/collections';
+import { prisma } from '@/lib/prisma';
 
 const createCollectionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -29,6 +30,16 @@ export async function createCollectionAction(formData: FormData): Promise<Create
       fieldErrors[field] = errors ?? [];
     }
     return { success: false, error: 'Validation failed.', fieldErrors };
+  }
+
+  if (!session.user.isPro) {
+    const collectionCount = await prisma.collection.count({ where: { userId: session.user.id } });
+    if (collectionCount >= 3) {
+      return {
+        success: false,
+        error: 'You have reached the 3-collection limit on the free plan. Upgrade to Pro for unlimited collections.',
+      };
+    }
   }
 
   await createCollectionInDb({

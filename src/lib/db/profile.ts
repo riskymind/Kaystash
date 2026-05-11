@@ -8,6 +8,7 @@ export type ProfileUser = {
   image: string | null;
   createdAt: Date;
   hasPassword: boolean;
+  stripeCustomerId: string | null;
 };
 
 export type ProfileTypeStat = {
@@ -33,6 +34,7 @@ export async function getProfileUser(userId: string): Promise<ProfileUser | null
       image: true,
       createdAt: true,
       password: true,
+      stripeCustomerId: true,
     },
   });
 
@@ -45,6 +47,7 @@ export async function getProfileUser(userId: string): Promise<ProfileUser | null
     image: user.image,
     createdAt: user.createdAt,
     hasPassword: !!user.password,
+    stripeCustomerId: user.stripeCustomerId,
   };
 }
 
