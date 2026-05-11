@@ -5,6 +5,9 @@ import { getSelectableCollections } from '@/lib/db/collections';
 import { ItemCardsWithDrawer } from '@/components/items/ItemCardsWithDrawer';
 import { Pagination } from '@/components/shared/Pagination';
 import { ITEMS_PER_PAGE } from '@/lib/constants/pagination';
+import { ProUpgradeGate } from '@/components/shared/ProUpgradeGate';
+
+const PRO_ONLY_TYPES = new Set(['file', 'image']);
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -18,6 +21,10 @@ export default async function ItemsListPage({ params, searchParams }: Props) {
   const { type } = await params;
   const typeName = typeSlugToName(type);
   if (!typeName) notFound();
+
+  if (PRO_ONLY_TYPES.has(typeName) && !session.user.isPro) {
+    return <ProUpgradeGate typeName={typeName} />;
+  }
 
   const { page: pageParam } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam ?? '1', 10) || 1);
