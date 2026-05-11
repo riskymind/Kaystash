@@ -1,15 +1,26 @@
-# Current Feature
+# Current Feature: Stripe Integration — Phase 1: Core Infrastructure
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Install `stripe` npm package
+- Add all five Stripe env vars to `.env` and `.env.example`
+- Create Stripe client singleton at `src/lib/stripe.ts`
+- Extend NextAuth session so `isPro` is available in `session.user` (via `jwt` + `session` callbacks)
+- Create `src/lib/db/subscription.ts` with `handleSubscriptionActivated` and `handleSubscriptionCancelled` helpers
+- Write Vitest unit tests for the subscription DB helpers (3 tests covering activate, cancel, unknown customer)
+- All tests pass and build has no TypeScript errors
 
 ## Notes
 
-<!-- Add notes here -->
+- No API routes or UI in this phase — foundation only
+- The `jwt` callback must always query DB for `isPro` so a page reload after checkout reflects pro status without needing to invalidate the JWT manually
+- `src/lib/stripe.ts` uses API version `2024-12-18.acacia`
+- Subscription helpers use `updateMany` with ownership via `stripeCustomerId` — no throw on zero matches
+- Tests mock `@/lib/prisma` with `vi.mock`; `updateMany` returns `{ count: 1 }` by default
+- Env vars needed: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
 ## History
 
