@@ -1,12 +1,19 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+
+function getResendClient() {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
-  await resend.emails.send({
+  await getResendClient().emails.send({
     from: "KayStash <onboarding@resend.dev>",
     to: email,
     subject: "Reset your password",
@@ -34,7 +41,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 export async function sendVerificationEmail(email: string, token: string) {
   const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
 
-  await resend.emails.send({
+  await getResendClient().emails.send({
     from: "KayStash <onboarding@resend.dev>",
     to: email,
     subject: "Verify your email address",
