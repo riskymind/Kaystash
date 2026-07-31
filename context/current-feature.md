@@ -13,6 +13,15 @@ Not Started
 
 ## History
 
+### 2026-07-31 — File List View
+
+- Added `fileName`/`fileSize` to the shared `ItemForDashboard` type in `src/lib/db/items.ts` and its four mapping sites (`getPinnedItems`, `getItemsByType`, `getFavoriteItems`, `getRecentItems`), plus `PaginatedCollectionItems` in `src/lib/db/collections.ts` (`getItemsInCollection`) — needed for row size/date display and to keep the shared type compatible across callers
+- Added `getFileIconName()` extension→icon-name mapper to `src/lib/constants/file-upload.ts` (pdf/txt/md → FileText, json → FileJson, yaml/yml/xml → FileCode, csv → FileSpreadsheet, toml/ini → FileCog, fallback → File)
+- Created `src/components/items/FileListItem.tsx` — single-column row: extension icon, title with favorite/pin indicators, file name, size, upload date, and a download button (`<a download>`, stops click propagation so the row click doesn't also open the drawer); row info stacks vertically below `sm`
+- Updated `src/components/items/ItemCardsWithDrawer.tsx` — added `isFileList` prop; renders a single-column flex list of `FileListItem` when true, taking precedence over the existing `isImageGrid`/default grid modes
+- Updated `src/app/(dashboard)/items/[type]/page.tsx` — passes `isFileList={typeName === 'file'}`; scope is only the `/items/files` listing, mirroring the `isImageGrid` precedent — other types and the mixed-type collection detail page are unaffected
+- Build, lint (one pre-existing, unrelated `react-hooks/set-state-in-effect` error in `ItemDrawer.tsx`, not touched this session), and `npm run test` (4 tests) all pass; browser verification was not completed this session
+
 ### 2026-07-31 — Image Gallery View
 
 - Added `fileUrl` to the shared `ItemForDashboard` type in `src/lib/db/items.ts` and to its four mapping sites (`getPinnedItems`, `getItemsByType`, `getFavoriteItems`, `getRecentItems`), plus the inline `PaginatedCollectionItems` item shape and its mapper in `src/lib/db/collections.ts` (`getItemsInCollection`) — needed so image thumbnails have a URL to render from these shared list queries
