@@ -33,6 +33,7 @@ export type ItemForDashboard = {
   isPinned: boolean;
   createdAt: Date;
   tags: string[];
+  fileUrl: string | null;
   itemType: {
     name: string;
     icon: string;
@@ -78,6 +79,7 @@ export async function getPinnedItems(userId: string): Promise<ItemForDashboard[]
     isPinned: item.isPinned,
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
+    fileUrl: item.fileUrl,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,
@@ -120,6 +122,7 @@ export async function getItemsByType(
       isPinned: item.isPinned,
       createdAt: item.createdAt,
       tags: item.tags.map((t) => t.name),
+      fileUrl: item.fileUrl,
       itemType: {
         name: item.itemType.name,
         icon: item.itemType.icon,
@@ -408,6 +411,7 @@ export async function getFavoriteItems(userId: string): Promise<ItemForDashboard
     isPinned: item.isPinned,
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
+    fileUrl: item.fileUrl,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,
@@ -435,6 +439,7 @@ export async function getRecentItems(userId: string, limit = 10): Promise<ItemFo
     isPinned: item.isPinned,
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
+    fileUrl: item.fileUrl,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,

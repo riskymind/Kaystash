@@ -219,6 +219,7 @@ export type PaginatedCollectionItems = {
     isPinned: boolean;
     createdAt: Date;
     tags: string[];
+    fileUrl: string | null;
     itemType: { name: string; icon: string; color: string };
   }>;
   totalCount: number;
@@ -255,6 +256,7 @@ export async function getItemsInCollection(
       isPinned: ic.item.isPinned,
       createdAt: ic.item.createdAt,
       tags: ic.item.tags.map((t) => t.name),
+      fileUrl: ic.item.fileUrl,
       itemType: {
         name: ic.item.itemType.name,
         icon: ic.item.itemType.icon,

@@ -52,7 +52,11 @@ export default async function ItemsListPage({ params, searchParams }: Props) {
         </div>
       ) : (
         <>
-          <ItemCardsWithDrawer items={items} collections={selectableCollections} />
+          <ItemCardsWithDrawer
+            items={items}
+            collections={selectableCollections}
+            isImageGrid={typeName === 'image'}
+          />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

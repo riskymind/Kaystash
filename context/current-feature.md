@@ -1,15 +1,21 @@
-# Current Feature
+# Current Feature: Image Gallery View
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Create an image thumbnail card to replace the current item card (for the image type)
+- Show an image grid/gallery layout with 3 columns
+- Thumbnails display with 16:9 aspect ratio (`aspect-video`)
+- Thumbnails use `object-cover` to fill the card (may crop edges)
+- Subtle hover zoom effect on thumbnails (5% scale, 300ms transition)
 
 ## Notes
 
-<!-- Add notes here -->
+- Source spec: `context/features/image-display-spec.md`
+- Scope is the `/items/images` listing — replace the generic `ItemCard` grid with an image-specific thumbnail card for that type
+- Existing `ItemCard` component is likely reused as-is for all other types; only the image type's presentation changes
 
 ## History
 
