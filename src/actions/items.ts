@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { auth } from '@/auth';
 import { createItemInDb, updateItemInDb, deleteItemInDb, toggleItemFavoriteInDb, toggleItemPinInDb, ItemDetail } from '@/lib/db/items';
 import { prisma } from '@/lib/prisma';
+import { deleteUploadThingFile } from '@/lib/uploadthing-server';
 
 const CONTENT_TYPES = {
   snippet: 'TEXT',
@@ -11,17 +12,28 @@ const CONTENT_TYPES = {
   prompt: 'TEXT',
   note: 'TEXT',
   link: 'URL',
+  file: 'FILE',
+  image: 'FILE',
 } as const;
+
+const fileMetadataSchema = z.object({
+  url: z.string(),
+  key: z.string(),
+  name: z.string(),
+  size: z.number(),
+  mimeType: z.string(),
+});
 
 const createItemSchema = z
   .object({
-    type: z.enum(['snippet', 'prompt', 'command', 'note', 'link']),
+    type: z.enum(['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image']),
     title: z.string().min(1, 'Title is required').max(200),
     description: z.string().max(500).optional(),
     content: z.string().optional(),
     url: z.string().optional(),
     language: z.string().optional(),
     tags: z.string().optional(), // comma-separated
+    fileMetadata: fileMetadataSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === 'link') {
@@ -34,6 +46,9 @@ const createItemSchema = z
           ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Must be a valid URL', path: ['url'] });
         }
       }
+    }
+    if ((data.type === 'file' || data.type === 'image') && !data.fileMetadata) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Upload a file before saving', path: ['fileMetadata'] });
     }
   });
 
@@ -50,6 +65,8 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
     ? (JSON.parse(rawCollectionIds as string) as string[])
     : [];
 
+  const rawFileMetadata = formData.get('fileMetadata');
+
   const raw = {
     type: formData.get('type'),
     title: formData.get('title'),
@@ -58,6 +75,7 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
     url: formData.get('url') || undefined,
     language: formData.get('language') || undefined,
     tags: formData.get('tags') || undefined,
+    fileMetadata: rawFileMetadata ? JSON.parse(rawFileMetadata as string) : undefined,
   };
 
   const parsed = createItemSchema.safeParse(raw);
@@ -69,7 +87,7 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
     return { success: false, error: 'Validation failed.', fieldErrors };
   }
 
-  const { type, title, description, content, url, language, tags } = parsed.data;
+  const { type, title, description, content, url, language, tags, fileMetadata } = parsed.data;
 
   if (!session.user.isPro) {
     const itemCount = await prisma.item.count({ where: { userId: session.user.id } });
@@ -106,6 +124,11 @@ export async function createItemAction(formData: FormData): Promise<ActionResult
     content,
     url,
     language,
+    fileUrl: fileMetadata?.url,
+    fileKey: fileMetadata?.key,
+    fileName: fileMetadata?.name,
+    fileSize: fileMetadata?.size,
+    mimeType: fileMetadata?.mimeType,
     tags: tagList,
     collectionIds,
     itemTypeId: itemType.id,
@@ -129,6 +152,7 @@ const updateItemSchema = z.object({
       { message: 'Must be a valid URL' },
     ),
   language: z.string().nullable().optional(),
+  fileMetadata: fileMetadataSchema.nullable().optional(),
   tags: z.array(z.string().trim().min(1)),
 });
 
@@ -144,6 +168,7 @@ export async function updateItemAction(
     content: string | null;
     url: string | null;
     language: string | null;
+    fileMetadata?: { url: string; key: string; name: string; size: number; mimeType: string } | null;
     tags: string[];
     collectionIds: string[];
   },
@@ -163,7 +188,17 @@ export async function updateItemAction(
     return { success: false, error: 'Validation failed.', fieldErrors };
   }
 
-  const updated = await updateItemInDb(itemId, session.user.id, { ...parsed.data, collectionIds });
+  const { fileMetadata, ...parsedRest } = parsed.data;
+
+  const updated = await updateItemInDb(itemId, session.user.id, {
+    ...parsedRest,
+    fileUrl: fileMetadata?.url ?? null,
+    fileKey: fileMetadata?.key ?? null,
+    fileName: fileMetadata?.name ?? null,
+    fileSize: fileMetadata?.size ?? null,
+    mimeType: fileMetadata?.mimeType ?? null,
+    collectionIds,
+  });
   if (!updated) return { success: false, error: 'Item not found or access denied.' };
 
   return { success: true, data: updated };
@@ -177,6 +212,18 @@ export async function deleteItemAction(itemId: string): Promise<DeleteActionResu
 
   const deleted = await deleteItemInDb(itemId, session.user.id);
   if (!deleted) return { success: false, error: 'Item not found or access denied.' };
+
+  return { success: true };
+}
+
+type DeleteUploadedFileResult = { success: true } | { success: false; error: string };
+
+export async function deleteUploadedFileAction(key: string): Promise<DeleteUploadedFileResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' };
+
+  const deleted = await deleteUploadThingFile(key);
+  if (!deleted) return { success: false, error: 'Could not delete the file.' };
 
   return { success: true };
 }

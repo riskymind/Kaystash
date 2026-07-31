@@ -1,15 +1,28 @@
-# Current Feature
+# Current Feature: File Upload with UploadThing
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Configure UploadThing with Next.js App Router
+- Create UploadThing file router with separate endpoints for images (`imageUploader`) and files (`fileUploader`)
+- Reusable `FileUpload` component with drag-and-drop, upload progress, preview/file-info, and remove/replace
+- Update Create Item modal to use `FileUpload` for image and file item types
+- Persist UploadThing metadata (`url`, `key`, `name`, `size`, `mimeType`) on the Item record — no file content in DB
+- Delete UploadThing file (via server API) when an item is deleted, before removing the DB record; fail gracefully to avoid orphaned files
+- Add a download button in `ItemDrawer` for file types
+- Validate file type/size on both client and server; block submission until upload completes
+- Toast notifications for all upload/deletion successes and errors
 
 ## Notes
 
-<!-- Add notes here -->
+- **Stack decision**: Confirmed with user to go with UploadThing per spec, despite `context/project-overview.md` listing Cloudflare R2. UploadThing is the storage provider for this feature.
+- All Prisma/DB functions for this feature belong in `src/lib/db/items.ts` (existing file), not a new module.
+- Image endpoint: max 5MB, 1 file, `.png/.jpg/.jpeg/.gif/.webp/.svg`
+- File endpoint: max 10MB, 1 file, `.pdf/.txt/.md/.json/.yaml/.yml/.xml/.csv/.toml/.ini`
+- Existing `Item` model already has `fileUrl`, `fileName`, `fileSize` columns but no `key` (UploadThing file key) or `mimeType` column — a migration will likely be needed to add these.
+- File/Image types are currently Pro-gated per `src/actions/items.ts` (added in Stripe Phase 2) — this feature builds on top of that gate.
 
 ## History
 

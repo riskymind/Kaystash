@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { ITEMS_PER_PAGE } from '@/lib/constants/pagination';
+import { deleteUploadThingFile } from '@/lib/uploadthing-server';
 
 // Slug → DB name map (URL uses plural, DB stores singular)
 const TYPE_SLUG_MAP: Record<string, string> = {
@@ -137,6 +138,11 @@ export type ItemDetail = {
   url: string | null;
   language: string | null;
   contentType: string;
+  fileUrl: string | null;
+  fileKey: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  mimeType: string | null;
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
@@ -172,6 +178,11 @@ export async function getItemDetail(itemId: string, userId: string): Promise<Ite
     url: item.url,
     language: item.language,
     contentType: item.contentType,
+    fileUrl: item.fileUrl,
+    fileKey: item.fileKey,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    mimeType: item.mimeType,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     createdAt: item.createdAt,
@@ -195,6 +206,11 @@ export type CreateItemInput = {
   content?: string;
   url?: string;
   language?: string;
+  fileUrl?: string;
+  fileKey?: string;
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
   tags: string[];
   collectionIds?: string[];
   itemTypeId: string;
@@ -208,6 +224,11 @@ export type UpdateItemInput = {
   content?: string | null;
   url?: string | null;
   language?: string | null;
+  fileUrl?: string | null;
+  fileKey?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
   tags: string[];
   collectionIds: string[];
 };
@@ -257,6 +278,11 @@ export async function updateItemInDb(
     url: updated.url,
     language: updated.language,
     contentType: updated.contentType,
+    fileUrl: updated.fileUrl,
+    fileKey: updated.fileKey,
+    fileName: updated.fileName,
+    fileSize: updated.fileSize,
+    mimeType: updated.mimeType,
     isFavorite: updated.isFavorite,
     isPinned: updated.isPinned,
     createdAt: updated.createdAt,
@@ -275,8 +301,16 @@ export async function updateItemInDb(
 }
 
 export async function deleteItemInDb(itemId: string, userId: string): Promise<boolean> {
-  const existing = await prisma.item.findFirst({ where: { id: itemId, userId } });
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { id: true, fileKey: true },
+  });
   if (!existing) return false;
+
+  if (existing.fileKey) {
+    await deleteUploadThingFile(existing.fileKey);
+  }
+
   await prisma.item.delete({ where: { id: itemId } });
   return true;
 }

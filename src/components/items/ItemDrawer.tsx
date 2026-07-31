@@ -21,6 +21,7 @@ import {
   Calendar,
   Check,
   X,
+  Download,
 } from 'lucide-react';
 import {
   Sheet,
@@ -43,6 +44,8 @@ import { ItemDetail } from '@/lib/db/items';
 import { updateItemAction, deleteItemAction, toggleItemFavoriteAction, toggleItemPinAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
+import { FileUpload, UploadedFileMetadata } from './FileUpload';
+import { formatFileSize } from '@/lib/constants/file-upload';
 
 const ICON_MAP = {
   Code,
@@ -60,6 +63,7 @@ const TEXT_TYPES = ['snippet', 'prompt', 'command', 'note'];
 const LANGUAGE_TYPES = ['snippet', 'command'];
 const CODE_TYPES = ['snippet', 'command'];
 const MARKDOWN_TYPES = ['prompt', 'note'];
+const FILE_TYPES = ['file', 'image'];
 
 function formatDate(iso: string | Date) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -106,6 +110,7 @@ type EditState = {
   url: string;
   language: string;
   tags: string;
+  fileMetadata: UploadedFileMetadata | null;
 };
 
 function itemToEditState(item: ItemDetail): EditState {
@@ -116,6 +121,16 @@ function itemToEditState(item: ItemDetail): EditState {
     url: item.url ?? '',
     language: item.language ?? '',
     tags: item.tags.join(', '),
+    fileMetadata:
+      item.fileUrl && item.fileKey
+        ? {
+            url: item.fileUrl,
+            key: item.fileKey,
+            name: item.fileName ?? '',
+            size: item.fileSize ?? 0,
+            mimeType: item.mimeType ?? '',
+          }
+        : null,
   };
 }
 
@@ -222,6 +237,7 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
       content: editState.content || null,
       url: editState.url || null,
       language: editState.language || null,
+      fileMetadata: editState.fileMetadata,
       tags,
       collectionIds: editCollectionIds,
     });
@@ -254,14 +270,19 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
     router.refresh();
   }
 
-  function patch(key: keyof EditState, value: string) {
+  function patch(key: keyof Omit<EditState, 'fileMetadata'>, value: string) {
     setEditState((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }
+
+  function patchFileMetadata(value: UploadedFileMetadata | null) {
+    setEditState((prev) => (prev ? { ...prev, fileMetadata: value } : prev));
   }
 
   const Icon = item ? (ICON_MAP[item.itemType.icon as IconName] ?? Box) : Box;
   const color = item?.itemType.color ?? '#6b7280';
   const typeName = item?.itemType.name ?? '';
   const showContent = TEXT_TYPES.includes(typeName);
+  const useFileUpload = FILE_TYPES.includes(typeName);
   const showLanguage = LANGUAGE_TYPES.includes(typeName);
   const showUrl = typeName === 'link';
   const useCodeEditor = CODE_TYPES.includes(typeName);
@@ -420,6 +441,44 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
               </section>
             )}
 
+            {/* File / Image */}
+            {useFileUpload && item.fileUrl && (
+              <section>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                  {typeName === 'image' ? 'Image' : 'File'}
+                </p>
+                {typeName === 'image' ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.fileUrl}
+                    alt={item.fileName ?? item.title}
+                    className="w-full max-h-80 rounded-md border border-border object-contain bg-muted"
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-3">
+                    <div className="size-10 rounded-md bg-muted flex items-center justify-center shrink-0">
+                      <File className="size-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{item.fileName}</p>
+                      {item.fileSize != null && (
+                        <p className="text-xs text-muted-foreground">{formatFileSize(item.fileSize)}</p>
+                      )}
+                    </div>
+                    <a
+                      href={item.fileUrl}
+                      download={item.fileName ?? undefined}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+                      title="Download"
+                    >
+                      <Download className="size-3.5" />
+                      Download
+                    </a>
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* URL */}
             {item.url && (
               <section>
@@ -507,7 +566,11 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSave}
-                disabled={saving || editState.title.trim() === ''}
+                disabled={
+                  saving ||
+                  editState.title.trim() === '' ||
+                  (useFileUpload && !editState.fileMetadata)
+                }
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Check className="size-3.5" />
@@ -570,6 +633,19 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
                     onChange={(v) => patch('content', v)}
                   />
                 ) : null}
+              </div>
+            )}
+
+            {/* File / Image — file and image types */}
+            {useFileUpload && (
+              <div>
+                <label className={labelClass}>{typeName === 'image' ? 'Image' : 'File'}</label>
+                <FileUpload
+                  endpoint={typeName === 'image' ? 'imageUploader' : 'fileUploader'}
+                  value={editState.fileMetadata}
+                  onChange={patchFileMetadata}
+                  disabled={saving}
+                />
               </div>
             )}
 

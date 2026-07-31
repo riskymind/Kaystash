@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Code, Sparkles, Terminal, StickyNote, Link } from 'lucide-react';
+import { Code, Sparkles, Terminal, StickyNote, Link, File, Image } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { createItemAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
+import { FileUpload, UploadedFileMetadata } from './FileUpload';
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
@@ -23,6 +24,8 @@ const ITEM_TYPES = [
   { name: 'command', label: 'Command', icon: Terminal, color: '#f97316' },
   { name: 'note', label: 'Note', icon: StickyNote, color: '#fde047' },
   { name: 'link', label: 'Link', icon: Link, color: '#10b981' },
+  { name: 'file', label: 'File', icon: File, color: '#6b7280' },
+  { name: 'image', label: 'Image', icon: Image, color: '#ec4899' },
 ] as const;
 
 type ItemTypeName = (typeof ITEM_TYPES)[number]['name'];
@@ -45,10 +48,12 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
   const [markdownContent, setMarkdownContent] = useState('');
   const [language, setLanguage] = useState('');
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
+  const [fileMetadata, setFileMetadata] = useState<UploadedFileMetadata | null>(null);
 
-  const showContent = selectedType !== 'link';
+  const showContent = selectedType !== 'link' && selectedType !== 'file' && selectedType !== 'image';
   const showLanguage = selectedType === 'snippet' || selectedType === 'command';
   const showUrl = selectedType === 'link';
+  const showFileUpload = selectedType === 'file' || selectedType === 'image';
   const useCodeEditor = selectedType === 'snippet' || selectedType === 'command';
   const useMarkdownEditor = selectedType === 'note' || selectedType === 'prompt';
 
@@ -61,6 +66,7 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
       setMarkdownContent('');
       setLanguage('');
       setSelectedCollectionIds([]);
+      setFileMetadata(null);
     }
     onOpenChange(next);
   }
@@ -69,6 +75,7 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
     setSelectedType(name);
     setCodeContent('');
     setMarkdownContent('');
+    setFileMetadata(null);
     setFieldErrors({});
   }
 
@@ -82,6 +89,9 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
     }
     if (useMarkdownEditor) {
       formData.set('content', markdownContent);
+    }
+    if (showFileUpload && fileMetadata) {
+      formData.set('fileMetadata', JSON.stringify(fileMetadata));
     }
     formData.set('collectionIds', JSON.stringify(selectedCollectionIds));
 
@@ -196,6 +206,16 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
             ) : null
           )}
 
+          {/* File upload — file and image types */}
+          {showFileUpload && (
+            <FileUpload
+              endpoint={selectedType === 'image' ? 'imageUploader' : 'fileUploader'}
+              value={fileMetadata}
+              onChange={setFileMetadata}
+              disabled={isPending}
+            />
+          )}
+
           {/* Tags */}
           <Input
             name="tags"
@@ -233,7 +253,7 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
           )}
 
           <DialogFooter showCloseButton>
-            <Button type="submit" size="sm" disabled={isPending}>
+            <Button type="submit" size="sm" disabled={isPending || (showFileUpload && !fileMetadata)}>
               {isPending ? 'Saving…' : 'Save'}
             </Button>
           </DialogFooter>
