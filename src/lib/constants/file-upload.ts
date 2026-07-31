@@ -27,3 +27,21 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+const EXTENSION_ICON_MAP: Record<string, string> = {
+  pdf: 'FileText',
+  txt: 'FileText',
+  md: 'FileText',
+  json: 'FileJson',
+  yaml: 'FileCode',
+  yml: 'FileCode',
+  xml: 'FileCode',
+  csv: 'FileSpreadsheet',
+  toml: 'FileCog',
+  ini: 'FileCog',
+};
+
+export function getFileIconName(fileName: string | null): string {
+  const extension = fileName?.split('.').pop()?.toLowerCase();
+  return (extension && EXTENSION_ICON_MAP[extension]) || 'File';
+}

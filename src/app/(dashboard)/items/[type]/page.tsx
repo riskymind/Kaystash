@@ -56,6 +56,7 @@ export default async function ItemsListPage({ params, searchParams }: Props) {
             items={items}
             collections={selectableCollections}
             isImageGrid={typeName === 'image'}
+            isFileList={typeName === 'file'}
           />
           <Pagination
             currentPage={currentPage}

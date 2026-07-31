@@ -34,6 +34,8 @@ export type ItemForDashboard = {
   createdAt: Date;
   tags: string[];
   fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   itemType: {
     name: string;
     icon: string;
@@ -80,6 +82,8 @@ export async function getPinnedItems(userId: string): Promise<ItemForDashboard[]
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
     fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,
@@ -123,6 +127,8 @@ export async function getItemsByType(
       createdAt: item.createdAt,
       tags: item.tags.map((t) => t.name),
       fileUrl: item.fileUrl,
+      fileName: item.fileName,
+      fileSize: item.fileSize,
       itemType: {
         name: item.itemType.name,
         icon: item.itemType.icon,
@@ -412,6 +418,8 @@ export async function getFavoriteItems(userId: string): Promise<ItemForDashboard
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
     fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,
@@ -440,6 +448,8 @@ export async function getRecentItems(userId: string, limit = 10): Promise<ItemFo
     createdAt: item.createdAt,
     tags: item.tags.map((t) => t.name),
     fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     itemType: {
       name: item.itemType.name,
       icon: item.itemType.icon,

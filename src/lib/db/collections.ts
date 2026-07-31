@@ -220,6 +220,8 @@ export type PaginatedCollectionItems = {
     createdAt: Date;
     tags: string[];
     fileUrl: string | null;
+    fileName: string | null;
+    fileSize: number | null;
     itemType: { name: string; icon: string; color: string };
   }>;
   totalCount: number;
@@ -257,6 +259,8 @@ export async function getItemsInCollection(
       createdAt: ic.item.createdAt,
       tags: ic.item.tags.map((t) => t.name),
       fileUrl: ic.item.fileUrl,
+      fileName: ic.item.fileName,
+      fileSize: ic.item.fileSize,
       itemType: {
         name: ic.item.itemType.name,
         icon: ic.item.itemType.icon,
