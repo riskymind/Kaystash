@@ -48,7 +48,7 @@ async function main() {
     update: {},
     create: {
       email: "kele@kaystash.io",
-      name: "Demo User",
+      name: "Demo Kele",
       password: passwordHash,
       isPro: false,
       emailVerified: new Date(),
@@ -393,92 +393,6 @@ CMD ["node", "server.js"]`,
         description: "Official Docker Compose file reference",
         tags: ["docker", "docs", "devops"],
         url: "https://docs.docker.com/compose/compose-file/",
-      },
-    ],
-  });
-
-  // ── Terminal Commands ─────────────────────────────────────────────────────
-  await seedCollection({
-    name: "Terminal Commands",
-    description: "Useful shell commands for everyday development",
-    defaultTypeName: "command",
-    items: [
-      {
-        title: "Git: Undo Last Commit (Keep Changes)",
-        typeName: "command",
-        contentType: ContentType.TEXT,
-        language: "bash",
-        description: "Soft reset — moves HEAD back one commit, keeps files staged",
-        tags: ["git", "undo"],
-        content: `git reset --soft HEAD~1`,
-      },
-      {
-        title: "Docker: Remove All Stopped Containers",
-        typeName: "command",
-        contentType: ContentType.TEXT,
-        language: "bash",
-        description: "Prune stopped containers, dangling images, and unused networks",
-        tags: ["docker", "cleanup"],
-        content: `docker system prune -f`,
-      },
-      {
-        title: "Find and Kill Process on Port",
-        typeName: "command",
-        contentType: ContentType.TEXT,
-        language: "bash",
-        description: "Kill whatever is listening on a given port (macOS/Linux)",
-        tags: ["process", "port", "kill"],
-        content: `lsof -ti tcp:3000 | xargs kill -9`,
-      },
-      {
-        title: "npm: Clean Install",
-        typeName: "command",
-        contentType: ContentType.TEXT,
-        language: "bash",
-        description: "Delete node_modules and lock file, then reinstall from scratch",
-        tags: ["npm", "clean"],
-        content: `rm -rf node_modules package-lock.json && npm install`,
-      },
-    ],
-  });
-
-  // ── Design Resources ──────────────────────────────────────────────────────
-  await seedCollection({
-    name: "Design Resources",
-    description: "UI/UX resources and references",
-    defaultTypeName: "link",
-    items: [
-      {
-        title: "Tailwind CSS Docs",
-        typeName: "link",
-        contentType: ContentType.URL,
-        description: "Official Tailwind CSS v4 documentation",
-        tags: ["tailwind", "css", "docs"],
-        url: "https://tailwindcss.com/docs",
-      },
-      {
-        title: "shadcn/ui Components",
-        typeName: "link",
-        contentType: ContentType.URL,
-        description: "Beautifully designed components built with Radix UI and Tailwind",
-        tags: ["shadcn", "components", "ui"],
-        url: "https://ui.shadcn.com",
-      },
-      {
-        title: "Radix UI Primitives",
-        typeName: "link",
-        contentType: ContentType.URL,
-        description: "Unstyled, accessible component primitives for React",
-        tags: ["radix", "accessibility", "components"],
-        url: "https://www.radix-ui.com/primitives",
-      },
-      {
-        title: "Lucide Icons",
-        typeName: "link",
-        contentType: ContentType.URL,
-        description: "Beautiful and consistent open-source icon library",
-        tags: ["icons", "lucide", "ui"],
-        url: "https://lucide.dev/icons",
       },
     ],
   });
