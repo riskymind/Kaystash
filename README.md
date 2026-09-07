@@ -2,6 +2,8 @@
 
 A developer knowledge hub for snippets, commands, prompts, notes, files, images, links, and custom types.
 
+![Dashboard](context/screenshots/dashboard.png)
+
 ## Tech Stack
 
 - **Framework** — Next.js 16 / React 19
