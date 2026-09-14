@@ -1,30 +1,27 @@
-# Current Feature: AI Summary (Description Generator)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add an icon button (Sparkles-style, matching `TagSuggestions`) next to/near the Description field that generates a concise AI summary
-- Clicking it calls an AI action that looks at the item's **title** and **content** (whatever is currently typed/selected in the form — no save required first) and returns a 1-2 sentence summary
-- Populate the Description field with the generated summary (replacing or filling it in — follow the same accept/insert pattern used for tag suggestions where sensible)
-- Works for **all item types**, using whatever content is available per type:
-  - snippet / command → code content + language
-  - prompt / note → markdown content
-  - link → URL (+ title)
-  - file / image → fileName / title (no text content available)
-- Available in both `NewItemDialog` (create) and `ItemDrawer` (edit mode) — same two places `TagSuggestions` was wired into
-- Pro-gated feature, same as auto-tagging (hidden entirely when `isPro` is false)
+<!-- List goals here -->
 
 ## Notes
 
-- Reuse existing AI infrastructure from AI Auto-Tagging: `src/lib/openai.ts` client singleton (`AI_MODEL = 'gpt-5-nano'`), OpenAI **Responses API** (`client.responses.create`, not Chat Completions), and the rate-limit pattern in `src/lib/rate-limit.ts` (add a new limiter, e.g. `aiSummary: createLimiter(20, "1 h")`)
-- Remember the gotcha from auto-tagging: `text.format: { type: 'json_object' }` requires the literal word "json" to appear in the `input` field itself, not just `instructions`
-- New server action in `src/actions/ai.ts`, e.g. `generateSummaryAction({ title, content, url, fileName })` — auth check, Pro gate, Zod validation, rate limit, truncate content similarly to tagging (~2000 chars), return `{ success, data/error }`
-- New client component (or extend `TagSuggestions`-style pattern) for the summary button — ghost icon button, loading state while generating, disabled/hidden when no title+content/url/fileName available to summarize
-- No save-first requirement — must work purely off current in-memory form state (mirrors how `TagSuggestions` already uses the active editor's live content, not persisted DB content)
+<!-- Add notes here -->
 
 ## History
+
+### 2026-09-14 — AI Summary (Description Generator)
+
+- Added `aiSummary: createLimiter(20, "1 h")` to the limiters map in `src/lib/rate-limit.ts`
+- Added `generateSummaryAction({ title, content, url, fileName })` to `src/actions/ai.ts` — auth check, Pro gate, Zod validation, rate limit, truncates content to 2000 chars, calls the OpenAI **Responses API** (`client.responses.create`); unlike auto-tagging, skips the `text.format: json_object` mode entirely (no JSON gotcha to work around) — asks the model to respond with plain summary text only, trims it, strips surrounding quote characters, and caps the result at 300 chars; builds the `input` from whichever of title/content/url/fileName are present so it works for every item type (snippet/command → code, prompt/note → markdown, link → URL, file/image → fileName)
+- Added 12 Vitest cases to `src/actions/ai.test.ts` (auth, Pro gate, validation, rate limit, plain-text parsing, quote-stripping, URL-only and fileName-only summarization, 2000-char truncation, 300-char cap, empty response, OpenAI throwing)
+- Created `src/components/items/SummaryButton.tsx` — shared client component: ghost icon button (`WandSparkles`, hidden entirely when `isPro` is false), disabled when title or all of content/url/fileName are missing, pulses while loading; calls `onGenerated(summary)` on success
+- Updated `src/components/items/NewItemDialog.tsx` — `description` and the link `url` input converted to controlled state (previously uncontrolled, like `title`/`tags` before auto-tagging); renders `SummaryButton` next to the description field using the active editor's content (code/markdown), the URL, or the uploaded file's name depending on the selected type; `url` state resets on type change
+- Updated `src/components/items/ItemDrawer.tsx` — renders `SummaryButton` next to the Description label in edit mode, wired to `editState`, filling `editState.description` on generate
+- Build, lint (one pre-existing, unrelated `react-hooks/set-state-in-effect` error in `ItemDrawer.tsx`, not touched this session), and `npm run test` (26 tests) all pass; live OpenAI/browser verification was not completed this session (sandbox has no network route to the API) — user may want to smoke-test locally
 
 ### 2026-09-14 — AI Auto-Tagging
 
