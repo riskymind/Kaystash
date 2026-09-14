@@ -442,6 +442,9 @@ export function ItemDrawer({ itemId, onClose, collections, isPro }: ItemDrawerPr
                     value={item.content}
                     language={item.language ?? undefined}
                     readOnly
+                    title={item.title}
+                    isPro={isPro}
+                    enableExplain
                   />
                 ) : useMarkdownEditor ? (
                   <MarkdownEditor value={item.content} readOnly />

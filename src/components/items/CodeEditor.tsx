@@ -2,23 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import Editor, { OnMount, loader } from '@monaco-editor/react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Sparkles, Loader2, Crown } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { toast } from 'sonner';
 import { useEditorPreferences } from '@/contexts/EditorPreferencesContext';
+import { explainCodeAction } from '@/actions/ai';
 
 interface CodeEditorProps {
   value: string;
   language?: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
+  // AI "Explain This Code" — drawer read view only (see enableExplain).
+  title?: string;
+  isPro?: boolean;
+  enableExplain?: boolean;
 }
 
 const MIN_HEIGHT = 120;
 const MAX_HEIGHT = 400;
 
-export function CodeEditor({ value, language, readOnly = false, onChange }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  language,
+  readOnly = false,
+  onChange,
+  title,
+  isPro = false,
+  enableExplain = false,
+}: CodeEditorProps) {
   const [copied, setCopied] = useState(false);
   const [editorHeight, setEditorHeight] = useState(MIN_HEIGHT);
   const { preferences } = useEditorPreferences();
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [tab, setTab] = useState<'code' | 'explain'>('code');
 
   useEffect(() => {
     loader.init().then((monaco) => {
@@ -72,6 +91,21 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
     setTimeout(() => setCopied(false), 1500);
   }
 
+  async function handleExplain() {
+    if (explaining) return;
+    setExplaining(true);
+    const result = await explainCodeAction({ title: title ?? '', content: value, language });
+    setExplaining(false);
+
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+
+    setExplanation(result.data.explanation);
+    setTab('explain');
+  }
+
   const handleMount: OnMount = (editor) => {
     const updateHeight = () => {
       const next = Math.min(Math.max(editor.getContentHeight(), MIN_HEIGHT), MAX_HEIGHT);
@@ -80,6 +114,8 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
     updateHeight();
     editor.onDidContentSizeChange(updateHeight);
   };
+
+  const showTabs = enableExplain && explanation !== null;
 
   return (
     <div className="rounded-md overflow-hidden border border-border bg-[#1e1e1e]">
@@ -90,9 +126,59 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
           <span className="size-3 rounded-full bg-[#28c840]" />
         </div>
         <div className="flex items-center gap-3">
+          {showTabs && (
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => setTab('code')}
+                className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                  tab === 'code'
+                    ? 'bg-[#404040] text-[#cccccc]'
+                    : 'text-[#858585] hover:text-[#cccccc]'
+                }`}
+              >
+                Code
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab('explain')}
+                className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                  tab === 'explain'
+                    ? 'bg-[#404040] text-[#cccccc]'
+                    : 'text-[#858585] hover:text-[#cccccc]'
+                }`}
+              >
+                Explain
+              </button>
+            </div>
+          )}
           {language && (
             <span className="text-xs text-[#858585] font-mono">{language}</span>
           )}
+          {enableExplain &&
+            (isPro ? (
+              <button
+                type="button"
+                onClick={handleExplain}
+                disabled={explaining}
+                className="flex items-center gap-1 text-xs text-[#858585] hover:text-[#cccccc] transition-colors disabled:opacity-50"
+                title="Explain this code with AI"
+              >
+                {explaining ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3.5" />
+                )}
+                {explaining ? 'Explaining…' : 'Explain'}
+              </button>
+            ) : (
+              <span
+                className="flex items-center text-[#858585]"
+                title="AI features require Pro subscription"
+              >
+                <Crown className="size-3.5" />
+              </span>
+            ))}
           <button
             onClick={handleCopy}
             className="flex items-center gap-1 text-xs text-[#858585] hover:text-[#cccccc] transition-colors"
@@ -104,42 +190,55 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
         </div>
       </div>
 
-      <div style={{ height: editorHeight }}>
-        <Editor
-          height="100%"
-          value={value}
-          language={language?.toLowerCase() ?? 'plaintext'}
-          theme={preferences.theme}
-          options={{
-            readOnly,
-            minimap: { enabled: preferences.minimap },
-            scrollBeyondLastLine: false,
-            automaticLayout: true,
-            fontSize: preferences.fontSize,
-            tabSize: preferences.tabSize,
-            lineHeight: Math.round(preferences.fontSize * 1.6),
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-            padding: { top: 12, bottom: 12 },
-            wordWrap: preferences.wordWrap,
-            scrollbar: {
-              vertical: 'auto',
-              horizontal: 'auto',
-              verticalScrollbarSize: 6,
-              horizontalScrollbarSize: 6,
-            },
-            overviewRulerLanes: 0,
-            renderLineHighlight: readOnly ? 'none' : 'line',
-            contextmenu: false,
-            folding: false,
-            lineNumbers: readOnly ? 'off' : 'on',
-            glyphMargin: false,
-            lineDecorationsWidth: readOnly ? 0 : 4,
-            lineNumbersMinChars: readOnly ? 0 : 3,
-          }}
-          onChange={(v) => onChange?.(v ?? '')}
-          onMount={handleMount}
-        />
-      </div>
+      {(!showTabs || tab === 'code') && (
+        <div style={{ height: editorHeight }}>
+          <Editor
+            height="100%"
+            value={value}
+            language={language?.toLowerCase() ?? 'plaintext'}
+            theme={preferences.theme}
+            options={{
+              readOnly,
+              minimap: { enabled: preferences.minimap },
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              fontSize: preferences.fontSize,
+              tabSize: preferences.tabSize,
+              lineHeight: Math.round(preferences.fontSize * 1.6),
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+              padding: { top: 12, bottom: 12 },
+              wordWrap: preferences.wordWrap,
+              scrollbar: {
+                vertical: 'auto',
+                horizontal: 'auto',
+                verticalScrollbarSize: 6,
+                horizontalScrollbarSize: 6,
+              },
+              overviewRulerLanes: 0,
+              renderLineHighlight: readOnly ? 'none' : 'line',
+              contextmenu: false,
+              folding: false,
+              lineNumbers: readOnly ? 'off' : 'on',
+              glyphMargin: false,
+              lineDecorationsWidth: readOnly ? 0 : 4,
+              lineNumbersMinChars: readOnly ? 0 : 3,
+            }}
+            onChange={(v) => onChange?.(v ?? '')}
+            onMount={handleMount}
+          />
+        </div>
+      )}
+
+      {showTabs && tab === 'explain' && (
+        <div
+          style={{ maxHeight: MAX_HEIGHT }}
+          className="overflow-y-auto px-4 py-3 min-h-[120px]"
+        >
+          <div className="markdown-preview">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{explanation}</ReactMarkdown>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

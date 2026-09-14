@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { auth } from '@/auth';
 import { openai } from '@/lib/openai';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { generateAutoTagsAction, generateSummaryAction } from './ai';
+import { generateAutoTagsAction, generateSummaryAction, explainCodeAction } from './ai';
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 vi.mock('@/lib/openai', () => ({
@@ -268,6 +268,121 @@ describe('generateSummaryAction', () => {
     mockCreate.mockRejectedValue(new Error('network error'));
 
     const result = await generateSummaryAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
+  });
+});
+
+describe('explainCodeAction', () => {
+  it('returns an error when not authenticated', async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await explainCodeAction({ title: 'A snippet', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error for free (non-Pro) users', async () => {
+    mockSession({ isPro: false });
+
+    const result = await explainCodeAction({ title: 'A snippet', content: 'code' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toMatch(/pro feature/i);
+    }
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when title is missing', async () => {
+    mockSession();
+
+    const result = await explainCodeAction({ title: '', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Invalid title or content.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when content is missing', async () => {
+    mockSession();
+
+    const result = await explainCodeAction({ title: 'A snippet', content: '' });
+
+    expect(result).toEqual({ success: false, error: 'Invalid title or content.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when rate limited', async () => {
+    mockSession();
+    mockCheckRateLimit.mockResolvedValue({ success: false, remaining: 0, reset: Date.now() });
+
+    const result = await explainCodeAction({ title: 'A snippet', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Too many AI requests. Please try again later.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns the trimmed explanation from the model response', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({
+      output_text: '  This function debounces a callback using `setTimeout`.  ',
+    } as never);
+
+    const result = await explainCodeAction({
+      title: 'useDebounce hook',
+      content: 'export function useDebounce() {}',
+      language: 'typescript',
+    });
+
+    expect(result).toEqual({
+      success: true,
+      data: { explanation: 'This function debounces a callback using `setTimeout`.' },
+    });
+    const call = mockCreate.mock.calls[0][0];
+    expect(String(call.input)).toContain('Language: typescript');
+  });
+
+  it('omits the language line when not provided', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'Explanation text.' } as never);
+
+    await explainCodeAction({ title: 'Item', content: 'echo hi' });
+
+    const call = mockCreate.mock.calls[0][0];
+    expect(String(call.input)).not.toContain('Language:');
+  });
+
+  it('truncates content to 2000 chars before calling the API', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'Explanation.' } as never);
+
+    await explainCodeAction({ title: 'Item', content: 'x'.repeat(5000) });
+
+    const call = mockCreate.mock.calls[0][0];
+    const inputContent = String(call.input);
+    expect(inputContent.length).toBeLessThanOrEqual(
+      'Title: Item\n\nContent:\n'.length + 2000,
+    );
+  });
+
+  it('returns an error when the model response is empty', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: '   ' } as never);
+
+    const result = await explainCodeAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'AI could not generate an explanation. Please try again.',
+    });
+  });
+
+  it('returns a generic error when the OpenAI call throws', async () => {
+    mockSession();
+    mockCreate.mockRejectedValue(new Error('network error'));
+
+    const result = await explainCodeAction({ title: 'Item', content: 'content' });
 
     expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
   });

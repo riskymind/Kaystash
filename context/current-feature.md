@@ -1,15 +1,28 @@
-# Current Feature
+# Current Feature: AI Explain Code
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add a Pro-only "Explain This Code" AI feature for `snippet` and `command` item types in the item drawer (read view only, not create/edit forms)
+- Create `explainCodeAction` server action (or route handler if streamed) — auth check, Pro gate, Zod validation, rate limit, following the `generateAutoTagsAction`/`generateSummaryAction` pattern (OpenAI Responses API, `gpt-5-nano`)
+- Add an "Explain" button (Sparkles icon) to the `CodeEditor` window-controls header, next to the existing Copy button, visible only for snippet/command types in the drawer
+- After generating, show Code/Explain tabs in the editor header to toggle between the code view and the explanation, rendered as markdown in the same container space as the editor (reuse `MarkdownEditor`-style rendering if practical)
+- Concise explanation (~200-300 words): what the code does + key concepts
+- Loading state: `Loader2` spinner while generating
+- Free users: show a `Crown` icon + tooltip ("AI features require Pro subscription") instead of the button
+- Errors (Pro gate, rate limit, AI failure) surfaced via toast
+- Explanations are NOT persisted — regenerated on each click
+- Unit tests for the server action (mirroring `ai.test.ts` patterns: auth, Pro gate, validation, rate limit, truncation, empty/failed response)
 
 ## Notes
 
-<!-- Add notes here -->
+- Spec: `context/features/ai-explain-spec.md`
+- Background/architecture reference: `docs/ai-integration-plan.md` — recommends Route Handler + streaming for this feature (code explanation benefits from progressive text) vs. the non-streaming Server Action pattern used for auto-tag/summary; decide streaming vs. non-streaming Server Action at implementation time based on existing codebase conventions
+- `isPro` must be threaded as a prop into the item drawer / `CodeEditor` (already partially threaded from AI Auto-Tagging work — verify it reaches `CodeEditor` itself, not just `ItemDrawer`)
+- Add a new rate limiter key (e.g. `aiExplain`) to `src/lib/rate-limit.ts`, matching `aiTagging`/`aiSummary` limiters
+- Scope is `CodeEditor` only (snippet/command) — `MarkdownEditor` (prompt/note) and other types are out of scope, per spec rationale that those are already human-readable
 
 ## History
 

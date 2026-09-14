@@ -34,6 +34,7 @@ const limiters = {
   resendVerification: createLimiter(3, "15 m"),
   aiTagging: createLimiter(20, "1 h"),
   aiSummary: createLimiter(20, "1 h"),
+  aiExplain: createLimiter(20, "1 h"),
 };
 
 export type RateLimitKey = keyof typeof limiters;
