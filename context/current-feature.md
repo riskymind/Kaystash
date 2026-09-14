@@ -1,30 +1,26 @@
-# Current Feature: AI Explain Code
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add a Pro-only "Explain This Code" AI feature for `snippet` and `command` item types in the item drawer (read view only, not create/edit forms)
-- Create `explainCodeAction` server action (or route handler if streamed) — auth check, Pro gate, Zod validation, rate limit, following the `generateAutoTagsAction`/`generateSummaryAction` pattern (OpenAI Responses API, `gpt-5-nano`)
-- Add an "Explain" button (Sparkles icon) to the `CodeEditor` window-controls header, next to the existing Copy button, visible only for snippet/command types in the drawer
-- After generating, show Code/Explain tabs in the editor header to toggle between the code view and the explanation, rendered as markdown in the same container space as the editor (reuse `MarkdownEditor`-style rendering if practical)
-- Concise explanation (~200-300 words): what the code does + key concepts
-- Loading state: `Loader2` spinner while generating
-- Free users: show a `Crown` icon + tooltip ("AI features require Pro subscription") instead of the button
-- Errors (Pro gate, rate limit, AI failure) surfaced via toast
-- Explanations are NOT persisted — regenerated on each click
-- Unit tests for the server action (mirroring `ai.test.ts` patterns: auth, Pro gate, validation, rate limit, truncation, empty/failed response)
+<!-- List goals here -->
 
 ## Notes
 
-- Spec: `context/features/ai-explain-spec.md`
-- Background/architecture reference: `docs/ai-integration-plan.md` — recommends Route Handler + streaming for this feature (code explanation benefits from progressive text) vs. the non-streaming Server Action pattern used for auto-tag/summary; decide streaming vs. non-streaming Server Action at implementation time based on existing codebase conventions
-- `isPro` must be threaded as a prop into the item drawer / `CodeEditor` (already partially threaded from AI Auto-Tagging work — verify it reaches `CodeEditor` itself, not just `ItemDrawer`)
-- Add a new rate limiter key (e.g. `aiExplain`) to `src/lib/rate-limit.ts`, matching `aiTagging`/`aiSummary` limiters
-- Scope is `CodeEditor` only (snippet/command) — `MarkdownEditor` (prompt/note) and other types are out of scope, per spec rationale that those are already human-readable
+<!-- Add notes here -->
 
 ## History
+
+### 2026-09-14 — AI Explain Code
+
+- Added `aiExplain: createLimiter(20, "1 h")` to the limiters map in `src/lib/rate-limit.ts`
+- Added `explainCodeAction({ title, content, language })` to `src/actions/ai.ts` — auth check, Pro gate, Zod validation (content required, min 1 char), rate limit, truncates content to 2000 chars, calls the OpenAI **Responses API**; asks for a ~200-300 word markdown explanation of what the code/command does and its key concepts, trims the response; builds `input` from title + optional language + content
+- Added 14 Vitest cases to `src/actions/ai.test.ts` (auth, Pro gate, missing title/content, rate limit, plain-text parsing, language interpolation, language omission, 2000-char truncation, empty response, OpenAI throwing)
+- Updated `src/components/items/CodeEditor.tsx` — new optional `title`/`isPro`/`enableExplain` props; when `enableExplain` is true, renders a Sparkles "Explain" button next to Copy (Pro users, `Loader2` spinner while loading) or a `Crown` icon with a native-tooltip title ("AI features require Pro subscription") for free users; once an explanation is generated, Code/Explain tabs appear in the header (same visual pattern as `MarkdownEditor`'s Write/Preview tabs) and the explanation renders via `ReactMarkdown`/`remark-gfm` in the `.markdown-preview` style, in the same container space as the editor; errors surfaced via `sonner` toast; explanations are held in local state only, never persisted, regenerated on each click
+- Updated `src/components/items/ItemDrawer.tsx` — passes `title`, `isPro`, and `enableExplain` to the read-view `CodeEditor` instance only (snippet/command types); the edit-mode `CodeEditor` instance and `NewItemDialog`'s instance are unchanged, so the feature is drawer-view-only per spec
+- Build, lint (one pre-existing, unrelated `react-hooks/set-state-in-effect` error in `ItemDrawer.tsx`, not touched this session), and `npm run test` (36 tests) all pass; confirmed via a stash-diff against `main` that both the lint error and a pre-existing `tsc --noEmit` mock-typing warning already existed before this branch; live OpenAI/browser verification was not completed this session (sandbox has no network route to the API) — user may want to smoke-test locally (open a snippet/command item, click Explain, confirm tab switch and markdown render)
 
 ### 2026-09-14 — AI Summary (Description Generator)
 
