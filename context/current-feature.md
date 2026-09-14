@@ -1,28 +1,26 @@
-# Current Feature: AI Prompt Optimizer
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
 
-- Add an "Optimize" action for `prompt` item types (Pro only) that sends the current prompt content to AI, gets back a refined version, and lets the user choose whether to accept it — never overwrites content silently
-- Button lives in the `MarkdownEditor` header, next to Copy — same visual/interaction pattern as the Sparkles "Explain" button in `CodeEditor` (Pro users see the button with a spinner while loading; free users see a `Crown` icon with the "AI features require Pro subscription" tooltip)
-- On click, show the optimized prompt (e.g. via Code/Optimized-style tabs like `CodeEditor`'s Code/Explain tabs, or an inline diff/before-after view — pick whichever fits `MarkdownEditor`'s existing tab pattern best) alongside an explicit "Use this version" / "Keep original" choice
-- Accepting the optimized version updates the prompt content in the editor (in edit mode) — in read-only/view mode, accepting should still let the user apply it (matches how other AI features are wired into `ItemDrawer`)
-- Scope is `prompt` type only — `note` type (which shares `MarkdownEditor`) is unaffected
+<!-- List goals here -->
 
 ## Notes
 
-- Follows the same server action pattern as `explainCodeAction`/`generateSummaryAction`/`generateAutoTagsAction` in `src/actions/ai.ts`: auth check → Pro gate → Zod validation → rate limit → truncate content to 2000 chars → OpenAI **Responses API** call (`client.responses.create`, plain text response, not JSON mode) → trim/return
-- New action: `optimizePromptAction({ title, content })` returning `{ success, data: { optimizedPrompt: string } }` or `{ success, error }`
-- New rate limiter: add `aiPromptOptimizer: createLimiter(20, "1 h")` to the limiters map in `src/lib/rate-limit.ts`
-- `MarkdownEditor.tsx` currently has no AI hooks at all (unlike `CodeEditor.tsx`, which already has `title`/`isPro`/`enableExplain` props and Explain wiring) — this feature adds that capability to `MarkdownEditor` for the first time, so its header/tab logic needs the same kind of extension `CodeEditor` got for Explain (`showTabs` derived state, tab buttons, Sparkles/Loader2/Crown button)
-- `ItemDrawer.tsx`: `MARKDOWN_TYPES = ['prompt', 'note']` currently renders plain `<MarkdownEditor readOnly>` for both types in view mode (line ~449-450) with no extra props — needs to pass `enableOptimize`/`isPro`/`title` only when `typeName === 'prompt'` (not `note`), mirroring how `enableExplain` is passed only to the snippet/command `CodeEditor` instance
-- Edit-mode `MarkdownEditor` instance and `NewItemDialog`'s instance are out of scope, per the Explain-feature precedent (drawer read-view only) — confirm this scope with the user if ambiguous before implementing
-- Add Vitest cases to `src/actions/ai.test.ts` for `optimizePromptAction` (auth, Pro gate, missing title/content, rate limit, plain-text parsing, 2000-char truncation, empty response, OpenAI throwing) — same coverage shape as `explainCodeAction`'s 14 tests
-- Live OpenAI/browser verification has not been possible in this sandbox for prior AI features (no network route) — flag the same limitation when this one is implemented
+<!-- Add notes here -->
 
 ## History
+
+### 2026-09-14 — AI Prompt Optimizer
+
+- Added `aiPromptOptimizer: createLimiter(20, "1 h")` to the limiters map in `src/lib/rate-limit.ts`
+- Added `optimizePromptAction({ title, content })` to `src/actions/ai.ts` — auth check, Pro gate, Zod validation (content required, min 1 char), rate limit, truncates content to 2000 chars, calls the OpenAI **Responses API** with a plain-text response (no JSON mode); asks the model to refine the prompt for clarity/specificity while preserving intent, making only light touch-ups if it's already well-written; trims the response
+- Added 9 Vitest cases to `src/actions/ai.test.ts` (auth, Pro gate, missing title/content, rate limit, plain-text parsing, 2000-char truncation, empty response, OpenAI throwing)
+- Updated `src/components/items/MarkdownEditor.tsx` — new optional `title`/`isPro`/`enableOptimize`/`onOptimized` props (first AI hook added to this component); when `enableOptimize` is true, renders a Sparkles "Optimize" button next to Copy (Pro users, `Loader2` spinner while loading) or a `Crown` icon with a native-tooltip title ("AI features require Pro subscription") for free users; once an optimized prompt is generated, an Original/Optimized tab pair appears (replacing the Write/Preview tabs) and the optimized version renders via `ReactMarkdown`/`remark-gfm`; a footer bar under the Optimized tab offers explicit "Keep original" / "Use this version" buttons — nothing is applied until the user chooses; "Use this version" calls `onOptimized(optimizedPrompt)` and clears local state
+- Updated `src/components/items/ItemDrawer.tsx` — passes `title`, `isPro`, `enableOptimize`, and a new `handlePromptOptimized` callback to the read-view `MarkdownEditor` instance only when `typeName === 'prompt'` (not `note`); `handlePromptOptimized` calls `updateItemAction` with the item's existing fields plus the optimized content so accepting actually persists the change, then updates local state and calls `router.refresh()`; the edit-mode `MarkdownEditor` instance and `NewItemDialog`'s instance are unchanged, so the feature is drawer-view-only per spec
+- Build, lint (one pre-existing, unrelated `react-hooks/set-state-in-effect` error in `ItemDrawer.tsx`, not touched this session), and `npm run test` (45 tests) all pass; live OpenAI/browser verification was not completed this session (sandbox has no network route to the API) — user may want to smoke-test locally (open a prompt item, click Optimize, confirm the Optimized tab appears, and that "Use this version" saves and persists after a refresh)
 
 ### 2026-09-14 — AI Explain Code
 
