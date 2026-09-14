@@ -1,15 +1,28 @@
-# Current Feature
+# Current Feature: AI Summary (Description Generator)
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
 
-<!-- List goals here -->
+- Add an icon button (Sparkles-style, matching `TagSuggestions`) next to/near the Description field that generates a concise AI summary
+- Clicking it calls an AI action that looks at the item's **title** and **content** (whatever is currently typed/selected in the form — no save required first) and returns a 1-2 sentence summary
+- Populate the Description field with the generated summary (replacing or filling it in — follow the same accept/insert pattern used for tag suggestions where sensible)
+- Works for **all item types**, using whatever content is available per type:
+  - snippet / command → code content + language
+  - prompt / note → markdown content
+  - link → URL (+ title)
+  - file / image → fileName / title (no text content available)
+- Available in both `NewItemDialog` (create) and `ItemDrawer` (edit mode) — same two places `TagSuggestions` was wired into
+- Pro-gated feature, same as auto-tagging (hidden entirely when `isPro` is false)
 
 ## Notes
 
-<!-- Add notes here -->
+- Reuse existing AI infrastructure from AI Auto-Tagging: `src/lib/openai.ts` client singleton (`AI_MODEL = 'gpt-5-nano'`), OpenAI **Responses API** (`client.responses.create`, not Chat Completions), and the rate-limit pattern in `src/lib/rate-limit.ts` (add a new limiter, e.g. `aiSummary: createLimiter(20, "1 h")`)
+- Remember the gotcha from auto-tagging: `text.format: { type: 'json_object' }` requires the literal word "json" to appear in the `input` field itself, not just `instructions`
+- New server action in `src/actions/ai.ts`, e.g. `generateSummaryAction({ title, content, url, fileName })` — auth check, Pro gate, Zod validation, rate limit, truncate content similarly to tagging (~2000 chars), return `{ success, data/error }`
+- New client component (or extend `TagSuggestions`-style pattern) for the summary button — ghost icon button, loading state while generating, disabled/hidden when no title+content/url/fileName available to summarize
+- No save-first requirement — must work purely off current in-memory form state (mirrors how `TagSuggestions` already uses the active editor's live content, not persisted DB content)
 
 ## History
 

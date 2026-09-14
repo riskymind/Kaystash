@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { auth } from '@/auth';
 import { openai } from '@/lib/openai';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { generateAutoTagsAction } from './ai';
+import { generateAutoTagsAction, generateSummaryAction } from './ai';
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 vi.mock('@/lib/openai', () => ({
@@ -130,6 +130,144 @@ describe('generateAutoTagsAction', () => {
     mockCreate.mockRejectedValue(new Error('network error'));
 
     const result = await generateAutoTagsAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
+  });
+});
+
+describe('generateSummaryAction', () => {
+  it('returns an error when not authenticated', async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await generateSummaryAction({ title: 'A snippet', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error for free (non-Pro) users', async () => {
+    mockSession({ isPro: false });
+
+    const result = await generateSummaryAction({ title: 'A snippet', content: 'code' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toMatch(/pro feature/i);
+    }
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when title is missing', async () => {
+    mockSession();
+
+    const result = await generateSummaryAction({ title: '', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Invalid title or content.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when rate limited', async () => {
+    mockSession();
+    mockCheckRateLimit.mockResolvedValue({ success: false, remaining: 0, reset: Date.now() });
+
+    const result = await generateSummaryAction({ title: 'A snippet', content: 'code' });
+
+    expect(result).toEqual({ success: false, error: 'Too many AI requests. Please try again later.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns the trimmed summary from a plain-text response', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({
+      output_text: '  A reusable React hook for handling authentication state.  ',
+    } as never);
+
+    const result = await generateSummaryAction({
+      title: 'useAuth hook',
+      content: 'export function useAuth() {}',
+    });
+
+    expect(result).toEqual({
+      success: true,
+      data: { summary: 'A reusable React hook for handling authentication state.' },
+    });
+  });
+
+  it('strips surrounding quotes from the response', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({
+      output_text: '"A concise one-line summary."',
+    } as never);
+
+    const result = await generateSummaryAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({ success: true, data: { summary: 'A concise one-line summary.' } });
+  });
+
+  it('summarizes from a URL when no content is available (link items)', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'A handy dev-tools reference site.' } as never);
+
+    const result = await generateSummaryAction({ title: 'Dev Tools', url: 'https://example.com' });
+
+    expect(result).toEqual({ success: true, data: { summary: 'A handy dev-tools reference site.' } });
+    const call = mockCreate.mock.calls[0][0];
+    expect(String(call.input)).toContain('URL: https://example.com');
+  });
+
+  it('summarizes from a file name when no content is available (file/image items)', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'A screenshot of the dashboard layout.' } as never);
+
+    const result = await generateSummaryAction({ title: 'Dashboard', fileName: 'dashboard.png' });
+
+    expect(result).toEqual({ success: true, data: { summary: 'A screenshot of the dashboard layout.' } });
+    const call = mockCreate.mock.calls[0][0];
+    expect(String(call.input)).toContain('File name: dashboard.png');
+  });
+
+  it('truncates content to 2000 chars before calling the API', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'A summary.' } as never);
+
+    await generateSummaryAction({ title: 'Item', content: 'x'.repeat(5000) });
+
+    const call = mockCreate.mock.calls[0][0];
+    const inputContent = String(call.input);
+    expect(inputContent.length).toBeLessThanOrEqual(
+      'Title: Item\n\nContent:\n'.length + 2000,
+    );
+  });
+
+  it('caps the summary length at 300 chars', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'x'.repeat(500) } as never);
+
+    const result = await generateSummaryAction({ title: 'Item', content: 'content' });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.summary).toHaveLength(300);
+    }
+  });
+
+  it('returns an error when the model response is empty', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: '   ' } as never);
+
+    const result = await generateSummaryAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'AI could not generate a summary. Please try again.',
+    });
+  });
+
+  it('returns a generic error when the OpenAI call throws', async () => {
+    mockSession();
+    mockCreate.mockRejectedValue(new Error('network error'));
+
+    const result = await generateSummaryAction({ title: 'Item', content: 'content' });
 
     expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
   });

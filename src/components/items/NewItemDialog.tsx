@@ -18,6 +18,7 @@ import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileUpload, UploadedFileMetadata } from './FileUpload';
 import { TagSuggestions } from './TagSuggestions';
+import { SummaryButton } from './SummaryButton';
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
@@ -47,9 +48,11 @@ export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewIte
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [isPending, startTransition] = useTransition();
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [codeContent, setCodeContent] = useState('');
   const [markdownContent, setMarkdownContent] = useState('');
   const [language, setLanguage] = useState('');
+  const [urlInput, setUrlInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
   const [fileMetadata, setFileMetadata] = useState<UploadedFileMetadata | null>(null);
@@ -67,9 +70,11 @@ export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewIte
       setSelectedType('snippet');
       setFieldErrors({});
       setTitle('');
+      setDescription('');
       setCodeContent('');
       setMarkdownContent('');
       setLanguage('');
+      setUrlInput('');
       setTagsInput('');
       setSelectedCollectionIds([]);
       setFileMetadata(null);
@@ -90,6 +95,7 @@ export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewIte
     setSelectedType(name);
     setCodeContent('');
     setMarkdownContent('');
+    setUrlInput('');
     setFileMetadata(null);
     setFieldErrors({});
   }
@@ -168,11 +174,24 @@ export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewIte
           </div>
 
           {/* Description */}
-          <Input
-            name="description"
-            placeholder="Description (optional)"
-            className="h-8 text-sm"
-          />
+          <div className="flex items-center gap-1.5">
+            <Input
+              name="description"
+              placeholder="Description (optional)"
+              className="h-8 text-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <SummaryButton
+              title={title}
+              content={useCodeEditor ? codeContent : useMarkdownEditor ? markdownContent : ''}
+              url={urlInput}
+              fileName={fileMetadata?.name}
+              onGenerated={setDescription}
+              isPro={isPro}
+              disabled={isPending}
+            />
+          </div>
 
           {/* URL — link type only */}
           {showUrl && (
@@ -182,6 +201,8 @@ export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewIte
                 placeholder="URL *"
                 className="h-8 text-sm"
                 type="url"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
               />
               {fieldErrors.url && (
                 <p className="text-xs text-destructive">{fieldErrors.url[0]}</p>

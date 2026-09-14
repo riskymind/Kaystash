@@ -46,6 +46,7 @@ import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileUpload, UploadedFileMetadata } from './FileUpload';
 import { TagSuggestions } from './TagSuggestions';
+import { SummaryButton } from './SummaryButton';
 import { formatFileSize } from '@/lib/constants/file-upload';
 
 const ICON_MAP = {
@@ -617,7 +618,20 @@ export function ItemDrawer({ itemId, onClose, collections, isPro }: ItemDrawerPr
 
             {/* Description */}
             <div>
-              <label className={labelClass}>Description</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Description
+                </label>
+                <SummaryButton
+                  title={editState.title}
+                  content={editState.content}
+                  url={editState.url}
+                  fileName={editState.fileMetadata?.name}
+                  onGenerated={(summary) => patch('description', summary)}
+                  isPro={isPro}
+                  disabled={saving}
+                />
+              </div>
               <textarea
                 value={editState.description}
                 onChange={(e) => patch('description', e.target.value)}
