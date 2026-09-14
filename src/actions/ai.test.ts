@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { auth } from '@/auth';
 import { openai } from '@/lib/openai';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { generateAutoTagsAction, generateSummaryAction, explainCodeAction } from './ai';
+import { generateAutoTagsAction, generateSummaryAction, explainCodeAction, optimizePromptAction } from './ai';
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 vi.mock('@/lib/openai', () => ({
@@ -383,6 +383,108 @@ describe('explainCodeAction', () => {
     mockCreate.mockRejectedValue(new Error('network error'));
 
     const result = await explainCodeAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
+  });
+});
+
+describe('optimizePromptAction', () => {
+  it('returns an error when not authenticated', async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await optimizePromptAction({ title: 'A prompt', content: 'Write some code' });
+
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error for free (non-Pro) users', async () => {
+    mockSession({ isPro: false });
+
+    const result = await optimizePromptAction({ title: 'A prompt', content: 'Write some code' });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toMatch(/pro feature/i);
+    }
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when title is missing', async () => {
+    mockSession();
+
+    const result = await optimizePromptAction({ title: '', content: 'Write some code' });
+
+    expect(result).toEqual({ success: false, error: 'Invalid title or content.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when content is missing', async () => {
+    mockSession();
+
+    const result = await optimizePromptAction({ title: 'A prompt', content: '' });
+
+    expect(result).toEqual({ success: false, error: 'Invalid title or content.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when rate limited', async () => {
+    mockSession();
+    mockCheckRateLimit.mockResolvedValue({ success: false, remaining: 0, reset: Date.now() });
+
+    const result = await optimizePromptAction({ title: 'A prompt', content: 'Write some code' });
+
+    expect(result).toEqual({ success: false, error: 'Too many AI requests. Please try again later.' });
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns the trimmed optimized prompt from the model response', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({
+      output_text: '  Write a Python function that reverses a linked list in place.  ',
+    } as never);
+
+    const result = await optimizePromptAction({
+      title: 'Reverse a list',
+      content: 'reverse a list',
+    });
+
+    expect(result).toEqual({
+      success: true,
+      data: { optimizedPrompt: 'Write a Python function that reverses a linked list in place.' },
+    });
+  });
+
+  it('truncates content to 2000 chars before calling the API', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: 'Optimized prompt.' } as never);
+
+    await optimizePromptAction({ title: 'Item', content: 'x'.repeat(5000) });
+
+    const call = mockCreate.mock.calls[0][0];
+    const inputContent = String(call.input);
+    expect(inputContent.length).toBeLessThanOrEqual(
+      'Title: Item\n\nPrompt:\n'.length + 2000,
+    );
+  });
+
+  it('returns an error when the model response is empty', async () => {
+    mockSession();
+    mockCreate.mockResolvedValue({ output_text: '   ' } as never);
+
+    const result = await optimizePromptAction({ title: 'Item', content: 'content' });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'AI could not optimize this prompt. Please try again.',
+    });
+  });
+
+  it('returns a generic error when the OpenAI call throws', async () => {
+    mockSession();
+    mockCreate.mockRejectedValue(new Error('network error'));
+
+    const result = await optimizePromptAction({ title: 'Item', content: 'content' });
 
     expect(result).toEqual({ success: false, error: 'AI request failed. Please try again.' });
   });

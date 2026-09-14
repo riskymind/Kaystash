@@ -259,6 +259,30 @@ export function ItemDrawer({ itemId, onClose, collections, isPro }: ItemDrawerPr
     router.refresh();
   }
 
+  async function handlePromptOptimized(optimizedPrompt: string) {
+    if (!item) return;
+
+    const result = await updateItemAction(item.id, {
+      title: item.title,
+      description: item.description ?? null,
+      content: optimizedPrompt,
+      url: item.url ?? null,
+      language: item.language ?? null,
+      fileMetadata: null,
+      tags: item.tags,
+      collectionIds: item.collections.map((c) => c.id),
+    });
+
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+
+    setItem(result.data);
+    toast.success('Prompt updated.');
+    router.refresh();
+  }
+
   async function handleDelete() {
     if (!item) return;
     setDeleting(true);
@@ -447,7 +471,14 @@ export function ItemDrawer({ itemId, onClose, collections, isPro }: ItemDrawerPr
                     enableExplain
                   />
                 ) : useMarkdownEditor ? (
-                  <MarkdownEditor value={item.content} readOnly />
+                  <MarkdownEditor
+                    value={item.content}
+                    readOnly
+                    title={typeName === 'prompt' ? item.title : undefined}
+                    isPro={typeName === 'prompt' ? isPro : undefined}
+                    enableOptimize={typeName === 'prompt'}
+                    onOptimized={typeName === 'prompt' ? handlePromptOptimized : undefined}
+                  />
                 ) : (
                   <pre className="text-xs bg-muted rounded-md p-4 overflow-x-auto whitespace-pre-wrap wrap-break-word font-mono leading-relaxed">
                     {item.content}
