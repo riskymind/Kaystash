@@ -93,14 +93,14 @@ export default async function DashboardPage() {
             <Pin className="size-3.5 text-muted-foreground" />
             <h2 className="text-sm font-semibold">Pinned</h2>
           </div>
-          <ItemRowsWithDrawer items={pinnedItems} collections={selectableCollections} />
+          <ItemRowsWithDrawer items={pinnedItems} collections={selectableCollections} isPro={session.user.isPro} />
         </section>
       )}
 
       {/* Recent items */}
       <section>
         <h2 className="text-sm font-semibold mb-4">Recent Items</h2>
-        <ItemRowsWithDrawer items={recentItems} collections={selectableCollections} />
+        <ItemRowsWithDrawer items={recentItems} collections={selectableCollections} isPro={session.user.isPro} />
       </section>
     </div>
   );

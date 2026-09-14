@@ -30,6 +30,7 @@ export default async function FavoritesPage() {
         items={items}
         collections={collections}
         drawerCollections={drawerCollections}
+        isPro={session.user.isPro}
       />
     </div>
   );

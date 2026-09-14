@@ -12,9 +12,10 @@ interface ItemCardsWithDrawerProps {
   collections: Array<{ id: string; name: string }>;
   isImageGrid?: boolean;
   isFileList?: boolean;
+  isPro: boolean;
 }
 
-export function ItemCardsWithDrawer({ items, collections, isImageGrid, isFileList }: ItemCardsWithDrawerProps) {
+export function ItemCardsWithDrawer({ items, collections, isImageGrid, isFileList, isPro }: ItemCardsWithDrawerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -38,7 +39,7 @@ export function ItemCardsWithDrawer({ items, collections, isImageGrid, isFileLis
           ),
         )}
       </div>
-      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} collections={collections} />
+      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} collections={collections} isPro={isPro} />
     </>
   );
 }

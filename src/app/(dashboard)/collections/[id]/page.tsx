@@ -66,7 +66,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         </div>
       ) : (
         <>
-          <ItemCardsWithDrawer items={items} collections={selectableCollections} />
+          <ItemCardsWithDrawer items={items} collections={selectableCollections} isPro={session.user.isPro} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

@@ -61,9 +61,10 @@ interface FavoritesListProps {
   items: ItemForDashboard[];
   collections: FavoriteCollection[];
   drawerCollections: Array<{ id: string; name: string }>;
+  isPro: boolean;
 }
 
-export function FavoritesList({ items, collections, drawerCollections }: FavoritesListProps) {
+export function FavoritesList({ items, collections, drawerCollections, isPro }: FavoritesListProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [itemSort, setItemSort] = useState<SortKey>('date-desc');
   const [collectionSort, setCollectionSort] = useState<SortKey>('date-desc');
@@ -207,6 +208,7 @@ export function FavoritesList({ items, collections, drawerCollections }: Favorit
         itemId={selectedId}
         onClose={() => setSelectedId(null)}
         collections={drawerCollections}
+        isPro={isPro}
       />
     </>
   );

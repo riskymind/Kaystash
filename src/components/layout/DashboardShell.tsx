@@ -130,7 +130,7 @@ export function DashboardShell({
             <span className="hidden lg:inline">New Item</span>
           </Button>
         </div>
-        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} collections={sidebarCollections} />
+        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} collections={sidebarCollections} isPro={user.isPro} />
         <NewCollectionDialog open={newCollectionOpen} onOpenChange={setNewCollectionOpen} />
       </header>
 
@@ -206,6 +206,7 @@ export function DashboardShell({
         itemId={selectedItemId}
         onClose={() => setSelectedItemId(null)}
         collections={drawerCollections}
+        isPro={user.isPro}
       />
     </div>
   );

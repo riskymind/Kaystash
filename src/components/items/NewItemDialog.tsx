@@ -17,6 +17,7 @@ import { createItemAction } from '@/actions/items';
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileUpload, UploadedFileMetadata } from './FileUpload';
+import { TagSuggestions } from './TagSuggestions';
 
 const ITEM_TYPES = [
   { name: 'snippet', label: 'Snippet', icon: Code, color: '#3b82f6' },
@@ -36,17 +37,20 @@ interface NewItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collections: Array<{ id: string; name: string }>;
+  isPro: boolean;
 }
 
-export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialogProps) {
+export function NewItemDialog({ open, onOpenChange, collections, isPro }: NewItemDialogProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedType, setSelectedType] = useState<ItemTypeName>('snippet');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [isPending, startTransition] = useTransition();
+  const [title, setTitle] = useState('');
   const [codeContent, setCodeContent] = useState('');
   const [markdownContent, setMarkdownContent] = useState('');
   const [language, setLanguage] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
   const [fileMetadata, setFileMetadata] = useState<UploadedFileMetadata | null>(null);
 
@@ -62,13 +66,24 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
       formRef.current?.reset();
       setSelectedType('snippet');
       setFieldErrors({});
+      setTitle('');
       setCodeContent('');
       setMarkdownContent('');
       setLanguage('');
+      setTagsInput('');
       setSelectedCollectionIds([]);
       setFileMetadata(null);
     }
     onOpenChange(next);
+  }
+
+  function acceptSuggestedTag(tag: string) {
+    const existing = tagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (existing.includes(tag)) return;
+    setTagsInput([...existing, tag].join(', '));
   }
 
   function handleTypeChange(name: ItemTypeName) {
@@ -143,6 +158,8 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
               name="title"
               placeholder="Title *"
               className="h-8 text-sm"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
             />
             {fieldErrors.title && (
@@ -221,6 +238,17 @@ export function NewItemDialog({ open, onOpenChange, collections }: NewItemDialog
             name="tags"
             placeholder="Tags (comma-separated)"
             className="h-8 text-sm"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+          />
+
+          <TagSuggestions
+            title={title}
+            content={useCodeEditor ? codeContent : useMarkdownEditor ? markdownContent : ''}
+            existingTags={tagsInput.split(',').map((t) => t.trim()).filter(Boolean)}
+            onAccept={acceptSuggestedTag}
+            isPro={isPro}
+            disabled={isPending}
           />
 
           {/* Collections */}

@@ -45,6 +45,7 @@ import { updateItemAction, deleteItemAction, toggleItemFavoriteAction, toggleIte
 import { CodeEditor } from './CodeEditor';
 import { MarkdownEditor } from './MarkdownEditor';
 import { FileUpload, UploadedFileMetadata } from './FileUpload';
+import { TagSuggestions } from './TagSuggestions';
 import { formatFileSize } from '@/lib/constants/file-upload';
 
 const ICON_MAP = {
@@ -138,9 +139,10 @@ interface ItemDrawerProps {
   itemId: string | null;
   onClose: () => void;
   collections: Array<{ id: string; name: string }>;
+  isPro: boolean;
 }
 
-export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, onClose, collections, isPro }: ItemDrawerProps) {
   const router = useRouter();
   const [item, setItem] = useState<ItemDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -272,6 +274,15 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
 
   function patch(key: keyof Omit<EditState, 'fileMetadata'>, value: string) {
     setEditState((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }
+
+  function acceptSuggestedTag(tag: string) {
+    setEditState((prev) => {
+      if (!prev) return prev;
+      const existing = prev.tags.split(',').map((t) => t.trim()).filter(Boolean);
+      if (existing.includes(tag)) return prev;
+      return { ...prev, tags: [...existing, tag].join(', ') };
+    });
   }
 
   function patchFileMetadata(value: UploadedFileMetadata | null) {
@@ -694,6 +705,16 @@ export function ItemDrawer({ itemId, onClose, collections }: ItemDrawerProps) {
                 disabled={saving}
               />
               <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
+              <div className="mt-2">
+                <TagSuggestions
+                  title={editState.title}
+                  content={editState.content}
+                  existingTags={editState.tags.split(',').map((t) => t.trim()).filter(Boolean)}
+                  onAccept={acceptSuggestedTag}
+                  isPro={isPro}
+                  disabled={saving}
+                />
+              </div>
             </div>
 
             {/* Collections picker */}

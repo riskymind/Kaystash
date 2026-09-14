@@ -93,9 +93,10 @@ function ItemRow({
 interface ItemRowsWithDrawerProps {
   items: ItemForDashboard[];
   collections: Array<{ id: string; name: string }>;
+  isPro: boolean;
 }
 
-export function ItemRowsWithDrawer({ items, collections }: ItemRowsWithDrawerProps) {
+export function ItemRowsWithDrawer({ items, collections, isPro }: ItemRowsWithDrawerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -105,7 +106,7 @@ export function ItemRowsWithDrawer({ items, collections }: ItemRowsWithDrawerPro
           <ItemRow key={item.id} item={item} onClick={setSelectedId} />
         ))}
       </div>
-      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} collections={collections} />
+      <ItemDrawer itemId={selectedId} onClose={() => setSelectedId(null)} collections={collections} isPro={isPro} />
     </>
   );
 }

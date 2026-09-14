@@ -57,6 +57,7 @@ export default async function ItemsListPage({ params, searchParams }: Props) {
             collections={selectableCollections}
             isImageGrid={typeName === 'image'}
             isFileList={typeName === 'file'}
+            isPro={session.user.isPro}
           />
           <Pagination
             currentPage={currentPage}
