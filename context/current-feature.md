@@ -13,6 +13,20 @@ Not Started
 
 ## History
 
+### 2026-09-14 — AI Auto-Tagging
+
+- Installed `openai` v7.15.0
+- Created `src/lib/openai.ts` — client singleton + `AI_MODEL = 'gpt-5-nano'` constant, the foundation for future AI features (summaries, code explanation, prompt optimizer)
+- Added `aiTagging: createLimiter(20, "1 h")` to the limiters map in `src/lib/rate-limit.ts`
+- Created `src/actions/ai.ts` — `generateAutoTagsAction({ title, content })`: auth check, Pro gate, Zod validation, rate limit, truncates content to 2000 chars, calls the OpenAI **Responses API** (`client.responses.create`, NOT Chat Completions — `gpt-5-nano` returns empty content on Chat Completions), parses `response.output_text` handling both `{"tags": [...]}` and bare-array response shapes, normalizes to lowercase, dedupes, caps at 5; returns the standard `{ success, data/error }` shape
+  - Gotcha found during manual verification: the Responses API's `text.format: { type: 'json_object' }` requires the literal word "json" to appear in the `input` field itself, not just `instructions` — otherwise it 400s. Fixed by prefixing `input` with "Return JSON tags for the item below."
+- Created `src/actions/ai.test.ts` — 10 Vitest cases (auth, Pro gate, validation, rate limit, both response shapes, 5-tag cap, 2000-char truncation, unparseable response, OpenAI throwing)
+- Created `src/components/items/TagSuggestions.tsx` — shared client component: ghost "Suggest Tags" button (Sparkles icon, hidden entirely when `isPro` is false), suggested tags render as dashed-outline badges with accept (check) / reject (X) icon buttons; accepted tags call back to the parent, rejected/accepted suggestions are removed from the pending list
+- Updated `src/components/items/NewItemDialog.tsx` — `title` and `tags` inputs converted to controlled state (previously uncontrolled) so accepted suggestions can append to the tags field; renders `TagSuggestions` below the tags input using the active editor's content (code or markdown) as context; added `isPro` prop
+- Updated `src/components/items/ItemDrawer.tsx` — renders `TagSuggestions` below the Tags field in edit mode, wired to `editState`; added `isPro` prop
+- Threaded `isPro` (from `session.user.isPro`, already available on every page via `auth()`) down as a prop through `ItemCardsWithDrawer`, `ItemRowsWithDrawer`, and `FavoritesList` to `ItemDrawer`, and directly from `DashboardShell`'s `user.isPro` to `NewItemDialog` and the global command-palette `ItemDrawer`; updated the 4 page call sites (`items/[type]/page.tsx`, `collections/[id]/page.tsx`, `dashboard/page.tsx` ×2, `favorites/page.tsx`) to pass it through
+- Build, lint (one pre-existing, unrelated `react-hooks/set-state-in-effect` error in `ItemDrawer.tsx`, not touched this session), and `npm run test` (14 tests) all pass; verified end-to-end against the live OpenAI API (real key) and in the browser after fixing the `json_object` input-format gotcha
+
 ### 2026-07-31 — File List View
 
 - Added `fileName`/`fileSize` to the shared `ItemForDashboard` type in `src/lib/db/items.ts` and its four mapping sites (`getPinnedItems`, `getItemsByType`, `getFavoriteItems`, `getRecentItems`), plus `PaginatedCollectionItems` in `src/lib/db/collections.ts` (`getItemsInCollection`) — needed for row size/date display and to keep the shared type compatible across callers
